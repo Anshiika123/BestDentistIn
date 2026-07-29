@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 pt-6">
+  {% include "partials/breadcrumbs.html" with crumbs=locality_crumbs %}
+</div>
+
+<section class="max-w-6xl mx-auto px-4">
+  <h1 class="text-3xl font-extrabold text-gray-900">Dentists in {{ locality.name }}, {{ city.name }}</h1>
+  <div class="prose prose-sm text-gray-600 mt-3 max-w-3xl">
+    {% if locality.intro_content %}
+      <p>{{ locality.intro_content|linebreaks }}</p>
+    {% else %}
+      <p>Find trusted dental clinics in {{ locality.name }}, {{ city.name }}. Compare timings and treatments,
+      then message a clinic directly on WhatsApp or call to book an appointment.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto px-4 mt-8">
+  <h2 class="text-xl font-bold text-gray-900 mb-4">{{ clinics|length }} clinic{{ clinics|length|pluralize }} in {{ locality.name }}</h2>
+  {% if clinics %}
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for clinic in clinics %}
+      {% include "partials/clinic_card.html" with clinic=clinic page_source="locality" page_slug=locality.url_slug %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-gray-500">No clinics listed in {{ locality.name }} yet. Browse other localities in {{ city.name }}.</p>
+  {% endif %}
+</section>
+
+<section class="max-w-6xl mx-auto px-4 mt-12">
+  <h2 class="text-xl font-bold text-gray-900 mb-4">Related Treatments</h2>
+  <div class="flex flex-wrap gap-2">
+    {% for t in treatments %}
+    <a href="{{ t.get_absolute_url }}" class="bg-white border border-gray-200 rounded-full px-4 py-2 text-sm text-gray-700 hover:border-brand-300">
+      {{ t.name }} in {{ city.name }}
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto px-4 mt-8">
+  <h2 class="text-xl font-bold text-gray-900 mb-4">Related Problems</h2>
+  <div class="flex flex-wrap gap-2">
+    {% for p in problems %}
+    <a href="{{ p.get_absolute_url }}" class="bg-white border border-gray-200 rounded-full px-4 py-2 text-sm text-gray-700 hover:border-brand-300">
+      {{ p.name }} in {{ city.name }}
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+{% if nearby_localities %}
+<section class="max-w-6xl mx-auto px-4 mt-8">
+  <h2 class="text-xl font-bold text-gray-900 mb-4">Nearby Localities in {{ city.name }}</h2>
+  <div class="flex flex-wrap gap-2">
+    {% for l in nearby_localities %}
+    <a href="/{{ l.url_slug }}/" class="bg-white border border-gray-200 rounded-full px-4 py-2 text-sm text-gray-700 hover:border-brand-300">
+      Dentists in {{ l.name }}
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<div class="max-w-6xl mx-auto px-4">
+  {% include "partials/faq.html" %}
+</div>
+{% endblock %}

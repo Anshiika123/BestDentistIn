@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 pt-10">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-extrabold text-gray-900">Clinics</h1>
+    {% include "partials/dashboard_nav.html" with active="clinics" %}
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-5 mt-6 overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="text-left text-gray-400 uppercase text-xs">
+        <tr><th class="py-2">Name</th><th>Locality</th><th>Phone</th><th>Verified</th><th>Active</th><th>Edit</th></tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for clinic in clinics %}
+        <tr>
+          <td class="py-2">{{ clinic.name }}</td>
+          <td>{{ clinic.locality.name }}</td>
+          <td>{{ clinic.phone_number }}</td>
+          <td>{% if clinic.is_verified %}✓{% else %}—{% endif %}</td>
+          <td>{% if clinic.is_active %}✓{% else %}—{% endif %}</td>
+          <td><a href="{% url 'admin:clinics_clinic_change' clinic.id %}" class="text-brand-600 hover:underline">Edit</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="text-sm text-gray-500 mt-4">Full add/edit forms are handled via the <a href="{% url 'admin:index' %}" class="text-brand-600 hover:underline">Django admin</a>.</p>
+</section>
+{% endblock %}

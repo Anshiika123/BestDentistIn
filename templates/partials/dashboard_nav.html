@@ -1,0 +1,8 @@
+{# Expects `active`: one of home|leads|pages|content|clinics #}
+<nav class="flex flex-wrap gap-4 text-sm font-medium">
+  <a href="{% url 'dashboard:home' %}" class="{% if active == 'home' %}text-brand-700{% else %}text-gray-500 hover:text-brand-700{% endif %}">Overview</a>
+  <a href="{% url 'dashboard:leads_list' %}" class="{% if active == 'leads' %}text-brand-700{% else %}text-gray-500 hover:text-brand-700{% endif %}">All Leads</a>
+  <a href="{% url 'dashboard:pages_performance' %}" class="{% if active == 'pages' %}text-brand-700{% else %}text-gray-500 hover:text-brand-700{% endif %}">Top Pages</a>
+  <a href="{% url 'dashboard:content_performance' %}" class="{% if active == 'content' %}text-brand-700{% else %}text-gray-500 hover:text-brand-700{% endif %}">Content Performance</a>
+  <a href="{% url 'dashboard:clinics_list' %}" class="{% if active == 'clinics' %}text-brand-700{% else %}text-gray-500 hover:text-brand-700{% endif %}">Clinics</a>
+</nav>

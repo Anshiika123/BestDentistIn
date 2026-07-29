@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="bg-gradient-to-b from-brand-50 to-white border-b border-gray-100">
+  <div class="max-w-6xl mx-auto px-4 py-16 text-center">
+    <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 leading-tight">
+      Find Verified Dentists in Roorkee
+    </h1>
+    <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto">
+      Find verified dentists in Roorkee and contact clinics instantly on WhatsApp or call.
+    </p>
+
+    <form action="/dentist-in-roorkee/" method="get" class="mt-8 max-w-xl mx-auto flex flex-col sm:flex-row gap-2 bg-white p-2 rounded-xl border border-gray-200 shadow-sm">
+      <select name="locality" class="flex-1 rounded-lg border-0 text-gray-700 focus:ring-2 focus:ring-brand-500 px-3 py-2">
+        <option value="">Any locality in Roorkee</option>
+        {% for locality in localities %}
+        <option value="{{ locality.slug }}">{{ locality.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="treatment" class="flex-1 rounded-lg border-0 text-gray-700 focus:ring-2 focus:ring-brand-500 px-3 py-2">
+        <option value="">Any treatment</option>
+        {% for t in treatments %}
+        <option value="{{ t.slug }}">{{ t.name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-2 rounded-lg">
+        Search Clinics
+      </button>
+    </form>
+  </div>
+</section>
+
+{% if featured_clinics %}
+<section class="max-w-6xl mx-auto px-4 py-14">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold text-gray-900">Featured Verified Clinics</h2>
+    <a href="/dentist-in-roorkee/" class="text-brand-700 font-medium text-sm hover:underline">View all →</a>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for clinic in featured_clinics %}
+      {% include "partials/clinic_card.html" with clinic=clinic page_source="home" page_slug="home" %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="max-w-6xl mx-auto px-4 py-10">
+  <h2 class="text-2xl font-bold text-gray-900 mb-6">Popular Treatments in Roorkee</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {% for t in treatments %}
+    <a href="{{ t.get_absolute_url }}" class="bg-white border border-gray-200 rounded-xl p-4 text-center hover:border-brand-300 hover:shadow-sm transition">
+      <span class="font-medium text-gray-800">{{ t.name }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto px-4 py-10">
+  <h2 class="text-2xl font-bold text-gray-900 mb-6">Common Dental Problems</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {% for p in problems %}
+    <a href="{{ p.get_absolute_url }}" class="bg-white border border-gray-200 rounded-xl p-4 text-center hover:border-brand-300 hover:shadow-sm transition">
+      <span class="font-medium text-gray-800">{{ p.name }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto px-4 py-14">
+  <div class="bg-white border border-gray-200 rounded-2xl p-8 grid md:grid-cols-3 gap-8">
+    <div>
+      <div class="text-brand-600 font-bold text-2xl mb-1">✓</div>
+      <h3 class="font-semibold text-gray-900">Verified Clinics</h3>
+      <p class="text-sm text-gray-600 mt-1">We confirm phone numbers, timings, and Google/website details before marking a clinic verified.</p>
+    </div>
+    <div>
+      <div class="text-brand-600 font-bold text-2xl mb-1">⚡</div>
+      <h3 class="font-semibold text-gray-900">Instant Contact</h3>
+      <p class="text-sm text-gray-600 mt-1">Skip the middleman. Message or call clinics directly on WhatsApp — appointments are handled by the clinic.</p>
+    </div>
+    <div>
+      <div class="text-brand-600 font-bold text-2xl mb-1">📍</div>
+      <h3 class="font-semibold text-gray-900">Hyperlocal to Roorkee</h3>
+      <p class="text-sm text-gray-600 mt-1">Browse by locality — Civil Lines, IIT Area, Ramnagar, and more — to find a dentist near you.</p>
+    </div>
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto px-4 py-14">
+  <div class="bg-brand-600 rounded-2xl p-8 md:p-12 text-center text-white">
+    <h2 class="text-2xl md:text-3xl font-bold">Run a dental clinic in Roorkee?</h2>
+    <p class="mt-2 text-brand-50">Get discovered by patients searching for dentists near them. Listing is free in Phase 1.</p>
+    <a href="https://wa.me/919999999999?text=Hi%2C%20I%20run%20a%20dental%20clinic%20in%20Roorkee%20and%20want%20to%20list%20it%20on%20BestDentistIn"
+       class="inline-block mt-6 bg-white text-brand-700 font-semibold px-6 py-3 rounded-lg hover:bg-brand-50">
+      List Your Clinic on WhatsApp
+    </a>
+  </div>
+</section>
+{% endblock %}

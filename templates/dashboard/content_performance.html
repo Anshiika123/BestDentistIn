@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 pt-10">
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-extrabold text-gray-900">Content Performance</h1>
+    {% include "partials/dashboard_nav.html" with active="content" %}
+  </div>
+  <p class="text-sm text-gray-500 mt-2">Views vs. leads by city, treatment, and problem — the SEO content that's actually converting.</p>
+
+  <div class="grid md:grid-cols-3 gap-6 mt-8">
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <h2 class="font-semibold text-gray-900 mb-3">By City</h2>
+      <table class="w-full text-sm">
+        <thead class="text-left text-gray-400 uppercase text-xs">
+          <tr><th class="py-2">City</th><th>Views</th><th>Leads</th><th>CTR</th></tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for row in city_rows %}
+          <tr>
+            <td class="py-2"><a href="{{ row.url }}" class="text-brand-600 hover:underline">{{ row.name }}</a></td>
+            <td>{{ row.views }}</td>
+            <td class="font-medium text-gray-900">{{ row.leads }}</td>
+            <td>{% if row.ctr is not None %}{{ row.ctr }}%{% else %}—{% endif %}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="py-4 text-gray-500">No data yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <h2 class="font-semibold text-gray-900 mb-3">By Treatment</h2>
+      <table class="w-full text-sm">
+        <thead class="text-left text-gray-400 uppercase text-xs">
+          <tr><th class="py-2">Treatment</th><th>Views</th><th>Leads</th><th>CTR</th></tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for row in treatment_rows %}
+          <tr>
+            <td class="py-2"><a href="{{ row.url }}" class="text-brand-600 hover:underline">{{ row.name }}</a></td>
+            <td>{{ row.views }}</td>
+            <td class="font-medium text-gray-900">{{ row.leads }}</td>
+            <td>{% if row.ctr is not None %}{{ row.ctr }}%{% else %}—{% endif %}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="py-4 text-gray-500">No data yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <h2 class="font-semibold text-gray-900 mb-3">By Problem</h2>
+      <table class="w-full text-sm">
+        <thead class="text-left text-gray-400 uppercase text-xs">
+          <tr><th class="py-2">Problem</th><th>Views</th><th>Leads</th><th>CTR</th></tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for row in problem_rows %}
+          <tr>
+            <td class="py-2"><a href="{{ row.url }}" class="text-brand-600 hover:underline">{{ row.name }}</a></td>
+            <td>{{ row.views }}</td>
+            <td class="font-medium text-gray-900">{{ row.leads }}</td>
+            <td>{% if row.ctr is not None %}{{ row.ctr }}%{% else %}—{% endif %}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="py-4 text-gray-500">No data yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,17 @@
+{# Expects `faqs` queryset of ClinicFAQ #}
+{% if faqs %}
+<section class="mt-10">
+  <h2 class="text-xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+  <div class="divide-y divide-gray-200 border border-gray-200 rounded-xl bg-white" x-data="{ open: null }">
+    {% for faq in faqs %}
+    <details class="p-4 group">
+      <summary class="font-medium text-gray-800 cursor-pointer list-none flex justify-between items-center">
+        {{ faq.question }}
+        <span class="text-gray-400 group-open:rotate-45 transition">+</span>
+      </summary>
+      <p class="text-sm text-gray-600 mt-2">{{ faq.answer }}</p>
+    </details>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}

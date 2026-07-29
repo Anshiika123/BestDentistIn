@@ -1,0 +1,39 @@
+<div class="bg-white rounded-xl border border-gray-200 hover:shadow-md transition p-5 flex flex-col">
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <a href="{{ clinic.get_absolute_url }}" class="font-semibold text-gray-900 hover:text-brand-700">{{ clinic.name }}</a>
+      <p class="text-sm text-gray-500 mt-0.5">{{ clinic.locality.name }}, {{ clinic.city.name }}</p>
+    </div>
+    {% if clinic.is_verified %}
+    <span class="shrink-0 inline-flex items-center gap-1 bg-brand-50 text-brand-700 text-xs font-semibold px-2 py-1 rounded-full">
+      ✓ Verified
+    </span>
+    {% endif %}
+  </div>
+
+  {% with dentist=clinic.dentists.first %}
+  {% if dentist %}
+  <p class="text-sm text-gray-600 mt-2">Dr. {{ dentist.name }} · {{ dentist.qualification }}</p>
+  {% endif %}
+  {% endwith %}
+
+  <p class="text-sm text-gray-500 mt-1">{{ clinic.timings }}</p>
+
+  <div class="flex flex-wrap gap-1.5 mt-3">
+    {% for t in clinic.treatments.all|slice:":4" %}
+    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{{ t.name }}</span>
+    {% endfor %}
+  </div>
+
+  <div class="mt-4 grid grid-cols-2 gap-2">
+    <a href="{% url 'leads:track_call' clinic.slug %}?source={{ page_source|default:'city' }}{% if page_slug %}&page_slug={{ page_slug }}{% endif %}{% if treatment %}&treatment={{ treatment.slug }}{% endif %}{% if problem %}&problem={{ problem.slug }}{% endif %}"
+       class="text-center text-sm font-semibold border border-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-50">
+      Call
+    </a>
+    <a href="{% url 'leads:track_whatsapp' clinic.slug %}?source={{ page_source|default:'city' }}{% if page_slug %}&page_slug={{ page_slug }}{% endif %}{% if treatment %}&treatment={{ treatment.slug }}{% endif %}{% if problem %}&problem={{ problem.slug }}{% endif %}"
+       class="text-center text-sm font-semibold bg-brand-600 text-white rounded-lg py-2 hover:bg-brand-700">
+      WhatsApp
+    </a>
+  </div>
+  <a href="{{ clinic.get_absolute_url }}" class="text-center text-sm text-brand-700 font-medium mt-3 hover:underline">View Profile →</a>
+</div>
