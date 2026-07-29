@@ -87,8 +87,14 @@
       <div>
         <h2 class="text-lg font-bold text-gray-900 mb-2">Gallery</h2>
         <div class="grid grid-cols-3 gap-2">
+          {% for photo in clinic.photos.all %}
+          <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+            <img src="{{ photo.image.url }}" alt="{{ photo.caption|default:clinic.name }}" class="w-full h-full object-cover">
+          </div>
+          {% empty %}
           {% for i in "123" %}
           <div class="aspect-square bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400">Photo placeholder</div>
+          {% endfor %}
           {% endfor %}
         </div>
       </div>

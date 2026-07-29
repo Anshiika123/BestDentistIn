@@ -41,12 +41,13 @@ def _resolve_context(request, clinic):
     treatment = None
     treatment_slug = request.GET.get("treatment")
     if treatment_slug:
-        treatment = Treatment.objects.filter(slug=treatment_slug).first()
+        # Scoped to the clinic's own city — Treatment.slug is only unique per city.
+        treatment = Treatment.objects.filter(slug=treatment_slug, city=clinic.city).first()
 
     problem = None
     problem_slug = request.GET.get("problem")
     if problem_slug:
-        problem = Problem.objects.filter(slug=problem_slug).first()
+        problem = Problem.objects.filter(slug=problem_slug, city=clinic.city).first()
 
     page_slug = request.GET.get("page_slug", "")[:220]
 

@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from apps.accounts.models import ClinicUser
 
-from .models import Clinic, ClinicFAQ, Dentist, Problem, Review, Treatment, VerificationRecord
+from .models import Clinic, ClinicFAQ, ClinicPhoto, Dentist, Problem, Review, Treatment, VerificationRecord
 
 
 class DentistInline(admin.TabularInline):
@@ -19,6 +19,11 @@ class ClinicFAQInline(admin.TabularInline):
     model = ClinicFAQ
     extra = 0
     fk_name = "clinic"
+
+
+class ClinicPhotoInline(admin.TabularInline):
+    model = ClinicPhoto
+    extra = 1
 
 
 class ClinicUserInline(admin.TabularInline):
@@ -44,7 +49,7 @@ class ClinicAdmin(admin.ModelAdmin):
     search_fields = ("name", "address", "phone_number", "whatsapp_number")
     prepopulated_fields = {"slug": ("name",)}
     filter_horizontal = ("treatments", "problems")
-    inlines = [DentistInline, VerificationInline, ClinicFAQInline, ClinicUserInline]
+    inlines = [DentistInline, VerificationInline, ClinicFAQInline, ClinicPhotoInline, ClinicUserInline]
 
     @admin.display(boolean=True, description="Verified")
     def verified_badge(self, obj):
@@ -59,14 +64,16 @@ class DentistAdmin(admin.ModelAdmin):
 
 @admin.register(Treatment)
 class TreatmentAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "is_active")
+    list_display = ("name", "city", "slug", "is_active")
+    list_filter = ("city", "is_active")
     prepopulated_fields = {"slug": ("name",)}
     filter_horizontal = ("related_problems",)
 
 
 @admin.register(Problem)
 class ProblemAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "is_active")
+    list_display = ("name", "city", "slug", "is_active")
+    list_filter = ("city", "is_active")
     prepopulated_fields = {"slug": ("name",)}
     filter_horizontal = ("suggested_treatment_categories",)
 

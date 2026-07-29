@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, render
 
 from apps.analytics.models import PageView
 from apps.analytics.utils import track_pageview
+from apps.core.utils import get_primary_city
 from apps.seo import schema
 from apps.seo.breadcrumbs import clinic_breadcrumbs, problem_breadcrumbs, treatment_breadcrumbs
 from apps.seo.linking import (
@@ -61,7 +62,11 @@ def clinic_detail(request, slug):
 
 
 def treatment_detail(request, slug):
-    treatment = get_object_or_404(Treatment, slug=slug, is_active=True)
+    # Treatment.slug is only unique per city (see Treatment docstring), and the URL
+    # is deliberately flat (/treatments/<slug>/) rather than city-prefixed, so this
+    # resolves against the primary city. A second city reusing the same slug would
+    # need city-prefixed URLs — not built yet, see README's multi-city note.
+    treatment = get_object_or_404(Treatment, slug=slug, city=get_primary_city(), is_active=True)
     clinics = (
         treatment.clinics.filter(is_active=True)
         .select_related("city", "locality")
@@ -70,7 +75,7 @@ def treatment_detail(request, slug):
     faqs = ClinicFAQ.objects.filter(treatment=treatment, clinic__isnull=True)
     related_problems = treatment.related_problems.filter(is_active=True)
     related_posts = related_blog_posts_for_treatment(treatment)
-    city = clinics[0].city if clinics else None
+    city = treatment.city
     crumbs = treatment_breadcrumbs(treatment, city=city)
 
     track_pageview(request, PageView.PageType.TREATMENT, page_slug=treatment.slug, treatment=treatment, city=city)
@@ -97,7 +102,9 @@ def treatment_detail(request, slug):
 
 
 def problem_detail(request, slug):
-    problem = get_object_or_404(Problem, slug=slug, is_active=True)
+    # See treatment_detail — Problem.slug is only unique per city; resolved against
+    # the primary city since URLs stay flat.
+    problem = get_object_or_404(Problem, slug=slug, city=get_primary_city(), is_active=True)
     clinics = (
         problem.clinics.filter(is_active=True)
         .select_related("city", "locality")
@@ -106,7 +113,7 @@ def problem_detail(request, slug):
     faqs = ClinicFAQ.objects.filter(problem=problem, clinic__isnull=True)
     suggested_treatments = problem.suggested_treatment_categories.filter(is_active=True)
     related_posts = related_blog_posts_for_problem(problem)
-    city = clinics[0].city if clinics else None
+    city = problem.city
     crumbs = problem_breadcrumbs(problem, city=city)
 
     track_pageview(request, PageView.PageType.PROBLEM, page_slug=problem.slug, problem=problem, city=city)

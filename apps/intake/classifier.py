@@ -39,8 +39,12 @@ class ClassificationResult:
     matched_treatments: list = field(default_factory=list)
 
 
-def classify(problem_description: str) -> ClassificationResult:
-    """Match free-text intake against known Problem categories by keyword overlap."""
+def classify(problem_description: str, city=None) -> ClassificationResult:
+    """
+    Match free-text intake against known Problem categories by keyword overlap,
+    scoped to `city` (Problem is city-scoped — see clinics.models.Problem). Falls
+    back to matching across all cities if no city is given.
+    """
     text = problem_description.lower().strip()
     if not text:
         return ClassificationResult(None, 0.0, "No description provided.")
@@ -48,7 +52,11 @@ def classify(problem_description: str) -> ClassificationResult:
     best_problem = None
     best_score = 0.0
 
-    for problem in Problem.objects.filter(is_active=True):
+    candidates = Problem.objects.filter(is_active=True)
+    if city:
+        candidates = candidates.filter(city=city)
+
+    for problem in candidates:
         haystacks = [problem.name.lower()] + SYNONYMS.get(problem.slug, [])
         score = 0.0
         for phrase in haystacks:

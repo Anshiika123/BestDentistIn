@@ -9,10 +9,18 @@ from apps.locations.models import City, Locality
 
 
 class Treatment(models.Model):
-    """A dental treatment/procedure, e.g. Root Canal, Braces."""
+    """
+    A dental treatment/procedure, e.g. Root Canal, Braces. City-scoped so a
+    second city can carry its own fee range/copy for the same treatment (e.g.
+    "braces cost in Dehradun" as its own indexable page) instead of one
+    city-agnostic page. URLs stay flat (/treatments/<slug>/, unchanged) and are
+    resolved against the primary city for now — see README for the multi-city
+    URL disambiguation this will need once a second city is actually added.
+    """
 
-    name = models.CharField(max_length=150, unique=True)
-    slug = models.SlugField(max_length=180, unique=True, help_text="e.g. root-canal")
+    city = models.ForeignKey(City, related_name="treatments", on_delete=models.CASCADE)
+    name = models.CharField(max_length=150)
+    slug = models.SlugField(max_length=180, help_text="e.g. root-canal")
     short_description = models.CharField(max_length=300, blank=True)
 
     explanation = models.TextField(blank=True, help_text="Simple explanation of the treatment.")
@@ -33,19 +41,21 @@ class Treatment(models.Model):
 
     class Meta:
         ordering = ["name"]
+        unique_together = [("city", "slug")]
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.city.name})"
 
     def get_absolute_url(self):
         return reverse("clinics:treatment_detail", kwargs={"slug": self.slug})
 
 
 class Problem(models.Model):
-    """A dental problem/symptom, e.g. Tooth Pain, Bleeding Gums."""
+    """A dental problem/symptom, e.g. Tooth Pain, Bleeding Gums. City-scoped — see Treatment."""
 
-    name = models.CharField(max_length=150, unique=True)
-    slug = models.SlugField(max_length=180, unique=True, help_text="e.g. tooth-pain")
+    city = models.ForeignKey(City, related_name="problems", on_delete=models.CASCADE)
+    name = models.CharField(max_length=150)
+    slug = models.SlugField(max_length=180, help_text="e.g. tooth-pain")
     short_description = models.CharField(max_length=300, blank=True)
 
     symptom_explanation = models.TextField(blank=True)
@@ -64,9 +74,10 @@ class Problem(models.Model):
 
     class Meta:
         ordering = ["name"]
+        unique_together = [("city", "slug")]
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.city.name})"
 
     def get_absolute_url(self):
         return reverse("clinics:problem_detail", kwargs={"slug": self.slug})
@@ -138,6 +149,21 @@ class Clinic(models.Model):
     @property
     def tel_link(self):
         return f"tel:{self.phone_number}"
+
+
+class ClinicPhoto(models.Model):
+    """Clinic gallery image. Replaces the placeholder gallery boxes on the clinic page when present."""
+
+    clinic = models.ForeignKey(Clinic, related_name="photos", on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="clinics/gallery/")
+    caption = models.CharField(max_length=150, blank=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "id"]
+
+    def __str__(self):
+        return self.caption or f"Photo of {self.clinic.name}"
 
 
 class Dentist(models.Model):

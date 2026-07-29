@@ -286,15 +286,19 @@ The routing already in place satisfies the brief's intent map without new machin
 | "tooth pain dentist Roorkee" / "best dentist for tooth pain" | Problem page (+ clinic list) | `/problems/<slug>/` |
 | "braces cost in Dehradun" (future city) | Treatment page, city-scoped | See note below |
 
-**Multi-city caveat**: `Treatment`/`Problem` are currently global rows (shared across all
-cities), so `/treatments/braces-orthodontics/` can't yet show a *different* fee range or copy
-for Dehradun vs. Roorkee — today it's one page per treatment, city-agnostic content, with a
-city-scoped clinic list underneath it. Making "braces cost in Dehradun" its own indexable page
-means either (a) a `TreatmentCityPage` model (treatment × city → override fee range/copy/meta)
-or (b) city-prefixed treatment slugs (`/treatments/braces-dehradun/`). Neither is built in
-Phase 2 — deliberately, per the "don't build for cities that don't exist yet" constraint — but
-`nearby_clinics`/`related_blog_posts_for_treatment`/breadcrumbs already take a `city` argument,
-so adding (a) later doesn't require touching the linking or schema layers.
+**Multi-city status** (updated post–Phase 2): `Treatment` and `Problem` now carry a `city` FK
+(`unique_together = (city, slug)`), so a second city *can* have its own fee range, copy, and
+FAQ content for "Braces" without touching Roorkee's — e.g. Dehradun's braces page would be a
+genuinely separate `Treatment` row from Roorkee's. What's **not** built yet: the URL is still
+flat (`/treatments/<slug>/`, resolved against `PRIMARY_CITY_SLUG` in
+`clinics/views.py::treatment_detail`/`problem_detail`) rather than city-prefixed, so a second
+city reusing the same slug (e.g. both cities having a `braces-orthodontics` treatment) would
+need city-prefixed URLs (`/treatments/<city>/<slug>/`) to be reachable — that URL change is
+still deferred until a second city actually exists, per "don't build for cities that don't
+exist yet." Every place that queries `Treatment`/`Problem` (home, city/locality pages, the
+footer, the intake classifier) now filters by city explicitly — see
+`apps/core/utils.py::get_primary_city()` and `apps/clinics/models.py`'s `Treatment`/`Problem`
+docstrings.
 
 ### What's still mocked in Phase 2
 
@@ -442,3 +446,26 @@ right point in the flow so that's a delivery-channel change, not an architecture
   — simpler and more reliable to ship, and the data model doesn't need to change to support a
   chat UI later (it would just populate the same `IntakeSession` fields turn-by-turn instead of
   all at once).
+
+---
+
+## Note: reconciling with the standalone blueprint doc
+
+A separate project blueprint document (different app/model naming — `LeadEvent`+`LeadStatus`
+instead of `Lead`, `seo_title`/`seo_description` instead of `meta_title`/`meta_description`,
+`/lead/whatsapp/` instead of `/leads/go/whatsapp/<slug>/`, etc.) was reviewed against this
+codebase. Rather than a full rename/restructure — which would mean a large schema + URL +
+template rewrite of already-working, tested code for naming differences with no functional
+gain — two specific, valuable pieces from it were adopted:
+
+1. **City-scoped `Treatment`/`Problem`** (this section, above) — genuinely useful for real
+   multi-city support and wasn't in the original Phase 2 design.
+2. **`ClinicPhoto`** (`apps/clinics/models.py`) — a real gallery model wired into
+   `clinic_detail.html`, replacing what was a permanent placeholder. Admin-manageable via an
+   inline on `ClinicAdmin`.
+
+**Deliberately not adopted**: the blueprint's `ClinicService` model. It would model exactly
+what `Clinic.treatments` (the existing Treatment M2M) already models — a clinic's list of
+services — under a different name. Adding it would mean either two parallel, unsynchronized
+ways to say "this clinic offers root canals," or `ClinicService` reduces to a thin proxy over
+`Treatment` with no independent purpose. Neither is worth the duplication.

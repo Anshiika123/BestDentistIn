@@ -67,8 +67,8 @@ def city_or_locality(request, rest):
 def _city_detail(request, city):
     clinics = _filter_clinics(request, Clinic.objects.filter(city=city, is_active=True))
     localities = city.localities.filter(is_active=True)
-    treatments = Treatment.objects.filter(is_active=True)
-    problems = Problem.objects.filter(is_active=True)
+    treatments = Treatment.objects.filter(city=city, is_active=True)
+    problems = Problem.objects.filter(city=city, is_active=True)
     faqs = ClinicFAQ.objects.filter(city=city, clinic__isnull=True, locality__isnull=True)
     crumbs = city_breadcrumbs(city)
 
@@ -99,8 +99,8 @@ def _locality_detail(request, locality):
     clinics = _filter_clinics(
         request, Clinic.objects.filter(locality=locality, is_active=True)
     )
-    treatments = Treatment.objects.filter(is_active=True)[:8]
-    problems = Problem.objects.filter(is_active=True)[:8]
+    treatments = Treatment.objects.filter(city=locality.city, is_active=True)[:8]
+    problems = Problem.objects.filter(city=locality.city, is_active=True)[:8]
     faqs = ClinicFAQ.objects.filter(locality=locality, clinic__isnull=True)
     nearby = nearby_localities(locality)
     crumbs = locality_breadcrumbs(locality)

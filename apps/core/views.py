@@ -23,8 +23,8 @@ def home(request):
             featured_clinics = Clinic.objects.filter(city=city, is_active=True).select_related("locality")[:6]
         localities = city.localities.filter(is_active=True)
 
-    treatments = Treatment.objects.filter(is_active=True)[:8]
-    problems = Problem.objects.filter(is_active=True)[:8]
+    treatments = Treatment.objects.filter(city=city, is_active=True)[:8] if city else Treatment.objects.none()
+    problems = Problem.objects.filter(city=city, is_active=True)[:8] if city else Problem.objects.none()
 
     track_pageview(request, PageView.PageType.HOME, page_slug="home", city=city)
 

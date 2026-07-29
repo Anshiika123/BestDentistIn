@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404, redirect, render
 
+from apps.core.utils import get_primary_city
 from apps.locations.models import Locality
 
 from .classifier import classify
@@ -44,7 +45,8 @@ def intake_start(request):
             language_preference=language_preference,
         )
 
-        result = classify(description)
+        classify_city = preferred_locality.city if preferred_locality else get_primary_city()
+        result = classify(description, city=classify_city)
         session.problem_category = result.problem
         session.confidence_score = result.confidence
         session.ai_notes = result.notes

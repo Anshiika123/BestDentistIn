@@ -241,8 +241,8 @@ class Command(BaseCommand):
 
         city = self._create_city()
         localities = self._create_localities(city)
-        treatments = self._create_treatments()
-        problems = self._create_problems(treatments)
+        treatments = self._create_treatments(city)
+        problems = self._create_problems(city, treatments)
         clinics = self._create_clinics(city, localities, treatments, problems, num_clinics)
         self._create_faqs(city, localities, treatments, problems)
         self._create_blog(treatments, problems)
@@ -287,10 +287,11 @@ class Command(BaseCommand):
             localities.append(locality)
         return localities
 
-    def _create_treatments(self):
+    def _create_treatments(self, city):
         treatments = []
         for t in TREATMENTS:
             obj, _ = Treatment.objects.update_or_create(
+                city=city,
                 slug=slugify(t["name"]),
                 defaults={
                     "name": t["name"],
@@ -307,7 +308,7 @@ class Command(BaseCommand):
             treatments.append(obj)
         return treatments
 
-    def _create_problems(self, treatments):
+    def _create_problems(self, city, treatments):
         problems = []
         treatment_by_slug = {t.slug: t for t in treatments}
         problem_treatment_map = {
@@ -322,6 +323,7 @@ class Command(BaseCommand):
         }
         for p in PROBLEMS:
             obj, _ = Problem.objects.update_or_create(
+                city=city,
                 slug=slugify(p["name"]),
                 defaults={
                     "name": p["name"],

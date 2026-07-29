@@ -11,5 +11,7 @@ def site_context(request):
         "footer_localities": Locality.objects.filter(
             city__slug=settings.PRIMARY_CITY_SLUG, is_active=True
         ).select_related("city")[:8],
-        "footer_treatments": Treatment.objects.filter(is_active=True)[:8],
+        "footer_treatments": Treatment.objects.filter(
+            city__slug=settings.PRIMARY_CITY_SLUG, is_active=True
+        )[:8],
     }
