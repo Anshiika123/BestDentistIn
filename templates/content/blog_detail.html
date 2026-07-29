@@ -6,31 +6,31 @@
 </div>
 
 <article class="max-w-3xl mx-auto px-4">
-  {% if post.category %}<p class="text-sm text-brand-600 font-semibold uppercase">{{ post.category.name }}</p>{% endif %}
-  <h1 class="text-3xl font-extrabold text-gray-900 mt-2">{{ post.title }}</h1>
-  <p class="text-sm text-gray-500 mt-2">By {{ post.author_name }} · {{ post.published_at|date:"M d, Y" }}</p>
+  {% if post.category %}<p class="text-sm text-teal-700 font-bold uppercase tracking-wide">{{ post.category.name }}</p>{% endif %}
+  <h1 class="font-heading text-3xl font-extrabold text-brand-900 mt-2">{{ post.title }}</h1>
+  <p class="text-sm text-slate-500 mt-2">By {{ post.author_name }} · {{ post.published_at|date:"M d, Y" }}</p>
 
-  <div class="h-56 bg-gray-100 rounded-xl mt-6 flex items-center justify-center text-xs text-gray-400">
-    {% if post.cover_image %}<img src="{{ post.cover_image.url }}" class="w-full h-full object-cover rounded-xl" alt="{{ post.title }}">{% else %}Cover image placeholder{% endif %}
+  <div class="h-56 bg-slate-100 rounded-xl mt-6 flex items-center justify-center text-xs text-slate-400">
+    {% if post.cover_image %}<img src="{{ post.cover_image.url }}" class="w-full h-full object-cover rounded-xl" alt="{{ post.title }}">{% else %}cover image placeholder{% endif %}
   </div>
 
-  <div class="prose prose-sm max-w-none text-gray-700 mt-8 leading-relaxed">
+  <div class="max-w-none text-slate-700 mt-8 leading-relaxed">
     {{ post.body|linebreaks }}
   </div>
 
-  <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mt-8 text-sm text-yellow-800">
+  <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-8 text-sm text-amber-800">
     This article is for informational purposes only and is not a substitute for professional dental advice.
   </div>
 
   {% if related_treatments or related_problems %}
   <div class="mt-8">
-    <h2 class="text-lg font-bold text-gray-900 mb-3">Related Pages</h2>
+    <h2 class="text-lg font-heading font-bold text-brand-900 mb-3">Related Pages</h2>
     <div class="flex flex-wrap gap-2">
       {% for t in related_treatments %}
-      <a href="{{ t.get_absolute_url }}" class="bg-gray-100 text-gray-700 text-sm px-3 py-1.5 rounded-full hover:bg-gray-200">{{ t.name }} in Roorkee</a>
+      <a href="{{ t.get_absolute_url }}" class="bg-slate-100 text-slate-700 text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-slate-200">{{ t.name }} in Roorkee</a>
       {% endfor %}
       {% for p in related_problems %}
-      <a href="{{ p.get_absolute_url }}" class="bg-gray-100 text-gray-700 text-sm px-3 py-1.5 rounded-full hover:bg-gray-200">{{ p.name }} in Roorkee</a>
+      <a href="{{ p.get_absolute_url }}" class="bg-slate-100 text-slate-700 text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-slate-200">{{ p.name }} in Roorkee</a>
       {% endfor %}
     </div>
   </div>
@@ -39,7 +39,7 @@
 
 {% if cta_clinics %}
 <section class="max-w-3xl mx-auto px-4 mt-12">
-  <h2 class="text-lg font-bold text-gray-900 mb-4">
+  <h2 class="text-lg font-heading font-bold text-brand-900 mb-4">
     {% if cta_treatment %}Clinics Offering {{ cta_treatment.name }}{% else %}Talk to a Clinic{% endif %}
   </h2>
   <div class="grid sm:grid-cols-3 gap-4">
@@ -52,11 +52,11 @@
 
 {% if related_posts %}
 <section class="max-w-3xl mx-auto px-4 mt-12">
-  <h2 class="text-lg font-bold text-gray-900 mb-4">Related Articles</h2>
+  <h2 class="text-lg font-heading font-bold text-brand-900 mb-4">Related Articles</h2>
   <div class="grid sm:grid-cols-3 gap-4">
     {% for p in related_posts %}
     <a href="{{ p.get_absolute_url }}" class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm">
-      <p class="text-sm font-medium text-gray-800">{{ p.title }}</p>
+      <p class="text-sm font-bold text-slate-800">{{ p.title }}</p>
     </a>
     {% endfor %}
   </div>

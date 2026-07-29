@@ -7,36 +7,36 @@
 
 <section class="max-w-5xl mx-auto px-4">
   <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
-    <div class="h-40 bg-gradient-to-r from-brand-500 to-brand-700 flex items-center justify-center text-white text-sm">
+    <div class="h-40 bg-slate-100 flex items-center justify-center text-slate-400 text-sm">
       {% if clinic.cover_photo %}
         <img src="{{ clinic.cover_photo.url }}" alt="{{ clinic.name }}" class="w-full h-full object-cover">
       {% else %}
-        Clinic photo placeholder
+        clinic cover photo placeholder
       {% endif %}
     </div>
     <div class="p-6">
       <div class="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900">{{ clinic.name }}</h1>
-          <p class="text-gray-600 mt-1">{{ clinic.address }}</p>
-          <p class="text-gray-500 text-sm mt-1">{{ clinic.locality.name }}, {{ clinic.city.name }}</p>
+          <h1 class="font-heading text-2xl md:text-3xl font-extrabold text-brand-900">{{ clinic.name }}</h1>
+          <p class="text-slate-600 mt-1">{{ clinic.address }}</p>
+          <p class="text-slate-500 text-sm mt-1">{{ clinic.locality.name }}, {{ clinic.city.name }}</p>
         </div>
         {% if clinic.is_verified %}
-        <span class="inline-flex items-center gap-1 bg-brand-50 text-brand-700 text-sm font-semibold px-3 py-1.5 rounded-full">
+        <span class="inline-flex items-center gap-1 bg-teal-50 text-teal-700 text-sm font-bold px-3 py-1.5 rounded-full">
           ✓ Verified
           {% if clinic.latest_verification.last_verified_at %}
-          <span class="text-brand-500 font-normal">· {{ clinic.latest_verification.last_verified_at|date:"M Y" }}</span>
+          <span class="text-teal-500 font-normal">· last checked {{ clinic.latest_verification.last_verified_at|date:"M Y" }}</span>
           {% endif %}
         </span>
         {% endif %}
       </div>
 
       <div class="grid sm:grid-cols-2 gap-3 mt-6">
-        <a href="{% url 'leads:track_call' clinic.slug %}?source=clinic&page_slug={{ clinic.slug }}" class="text-center border border-gray-300 text-gray-800 font-semibold rounded-lg py-3 hover:bg-gray-50">
-          📞 Call {{ clinic.phone_number }}
+        <a href="{% url 'leads:track_call' clinic.slug %}?source=clinic&page_slug={{ clinic.slug }}" class="text-center border-[1.5px] border-brand-700 text-brand-700 font-bold rounded-lg py-3 hover:bg-brand-50">
+          Call {{ clinic.phone_number }}
         </a>
-        <a href="{% url 'leads:track_whatsapp' clinic.slug %}?source=clinic&page_slug={{ clinic.slug }}" class="text-center bg-brand-600 text-white font-semibold rounded-lg py-3 hover:bg-brand-700">
-          💬 WhatsApp Now
+        <a href="{% url 'leads:track_whatsapp' clinic.slug %}?source=clinic&page_slug={{ clinic.slug }}" class="text-center bg-[#25D366] text-[#08341c] font-bold rounded-lg py-3 hover:brightness-95">
+          Ask on WhatsApp
         </a>
       </div>
     </div>
@@ -46,54 +46,54 @@
     <div class="md:col-span-2 space-y-8">
       {% if clinic.about %}
       <div>
-        <h2 class="text-lg font-bold text-gray-900 mb-2">About the Clinic</h2>
-        <p class="text-gray-600 text-sm leading-relaxed">{{ clinic.about }}</p>
+        <h2 class="text-lg font-heading font-bold text-brand-900 mb-2">About the Clinic</h2>
+        <p class="text-slate-600 text-sm leading-relaxed">{{ clinic.about }}</p>
       </div>
       {% endif %}
 
       {% if primary_dentist %}
       <div>
-        <h2 class="text-lg font-bold text-gray-900 mb-2">Dentist</h2>
+        <h2 class="text-lg font-heading font-bold text-brand-900 mb-2">Dentist</h2>
         <div class="bg-white border border-gray-200 rounded-xl p-4 flex gap-4 items-center">
-          <div class="w-14 h-14 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center shrink-0">
+          <div class="w-14 h-14 rounded-full bg-brand-50 text-brand-700 font-heading font-bold flex items-center justify-center shrink-0">
             {{ primary_dentist.name|slice:":1" }}
           </div>
           <div>
-            <p class="font-semibold text-gray-900">Dr. {{ primary_dentist.name }}</p>
-            <p class="text-sm text-gray-500">{{ primary_dentist.qualification }} · {{ primary_dentist.experience_years }} yrs experience</p>
+            <p class="font-bold text-slate-900">Dr. {{ primary_dentist.name }}</p>
+            <p class="text-sm text-slate-500">{{ primary_dentist.qualification }} · {{ primary_dentist.experience_years }} yrs experience</p>
           </div>
         </div>
       </div>
       {% endif %}
 
       <div>
-        <h2 class="text-lg font-bold text-gray-900 mb-2">Treatments Offered</h2>
+        <h2 class="text-lg font-heading font-bold text-brand-900 mb-2">Treatments Offered</h2>
         <div class="flex flex-wrap gap-2">
           {% for t in related_treatments %}
-          <a href="{{ t.get_absolute_url }}" class="bg-gray-100 text-gray-700 text-sm px-3 py-1.5 rounded-full hover:bg-gray-200">{{ t.name }}</a>
+          <a href="{{ t.get_absolute_url }}" class="bg-slate-100 text-slate-700 text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-slate-200">{{ t.name }}</a>
           {% endfor %}
         </div>
       </div>
 
       <div>
-        <h2 class="text-lg font-bold text-gray-900 mb-2">Problems Treated</h2>
+        <h2 class="text-lg font-heading font-bold text-brand-900 mb-2">Problems Treated</h2>
         <div class="flex flex-wrap gap-2">
           {% for p in related_problems %}
-          <a href="{{ p.get_absolute_url }}" class="bg-gray-100 text-gray-700 text-sm px-3 py-1.5 rounded-full hover:bg-gray-200">{{ p.name }}</a>
+          <a href="{{ p.get_absolute_url }}" class="bg-slate-100 text-slate-700 text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-slate-200">{{ p.name }}</a>
           {% endfor %}
         </div>
       </div>
 
       <div>
-        <h2 class="text-lg font-bold text-gray-900 mb-2">Gallery</h2>
+        <h2 class="text-lg font-heading font-bold text-brand-900 mb-2">Gallery</h2>
         <div class="grid grid-cols-3 gap-2">
           {% for photo in clinic.photos.all %}
-          <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+          <div class="aspect-square bg-slate-100 rounded-lg overflow-hidden">
             <img src="{{ photo.image.url }}" alt="{{ photo.caption|default:clinic.name }}" class="w-full h-full object-cover">
           </div>
           {% empty %}
           {% for i in "123" %}
-          <div class="aspect-square bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400">Photo placeholder</div>
+          <div class="aspect-square bg-slate-100 rounded-lg flex items-center justify-center text-xs text-slate-400">photo placeholder</div>
           {% endfor %}
           {% endfor %}
         </div>
@@ -103,25 +103,25 @@
     </div>
 
     <aside class="space-y-4">
-      <div class="bg-white border border-gray-200 rounded-xl p-4 text-sm space-y-3">
+      <div class="bg-white border border-gray-200 rounded-xl p-4 text-sm space-y-4">
         <div>
-          <p class="text-gray-400 uppercase text-xs font-semibold">Timings</p>
-          <p class="text-gray-800">{{ clinic.timings }}</p>
+          <p class="text-slate-400 uppercase text-xs font-bold tracking-wide">Timings</p>
+          <p class="text-slate-800 font-semibold mt-1">{{ clinic.timings }}</p>
         </div>
         {% if clinic.consultation_fee %}
         <div>
-          <p class="text-gray-400 uppercase text-xs font-semibold">Consultation Fee</p>
-          <p class="text-gray-800">₹{{ clinic.consultation_fee }}</p>
+          <p class="text-slate-400 uppercase text-xs font-bold tracking-wide">Consultation Fee</p>
+          <p class="text-slate-800 font-semibold mt-1">₹{{ clinic.consultation_fee }}</p>
         </div>
         {% endif %}
         <div>
-          <p class="text-gray-400 uppercase text-xs font-semibold">Phone</p>
-          <p class="text-gray-800">{{ clinic.phone_number }}</p>
+          <p class="text-slate-400 uppercase text-xs font-bold tracking-wide">Phone</p>
+          <p class="text-slate-800 font-semibold mt-1">{{ clinic.phone_number }}</p>
         </div>
         <div>
-          <p class="text-gray-400 uppercase text-xs font-semibold">Map</p>
-          <div class="mt-1 h-32 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400">
-            Map embed placeholder
+          <p class="text-slate-400 uppercase text-xs font-bold tracking-wide mb-1">Map</p>
+          <div class="h-32 bg-slate-100 rounded-lg flex items-center justify-center text-xs text-slate-400">
+            map embed placeholder
           </div>
         </div>
       </div>
@@ -130,7 +130,7 @@
 
   {% if nearby_clinics %}
   <div class="mt-10">
-    <h2 class="text-lg font-bold text-gray-900 mb-4">Nearby Clinics in {{ clinic.locality.name }}</h2>
+    <h2 class="text-lg font-heading font-bold text-brand-900 mb-4">Nearby Clinics in {{ clinic.locality.name }}</h2>
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {% for nc in nearby_clinics %}
         {% include "partials/clinic_card.html" with clinic=nc page_source="clinic" page_slug=clinic.slug %}

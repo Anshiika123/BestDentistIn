@@ -4,6 +4,7 @@ from django.shortcuts import render
 from apps.analytics.models import PageView
 from apps.analytics.utils import track_pageview
 from apps.clinics.models import Clinic, Problem, Treatment
+from apps.content.models import BlogPost
 
 from .utils import get_primary_city
 
@@ -25,6 +26,7 @@ def home(request):
 
     treatments = Treatment.objects.filter(city=city, is_active=True)[:8] if city else Treatment.objects.none()
     problems = Problem.objects.filter(city=city, is_active=True)[:8] if city else Problem.objects.none()
+    latest_posts = BlogPost.objects.filter(is_published=True).select_related("category")[:3]
 
     track_pageview(request, PageView.PageType.HOME, page_slug="home", city=city)
 
@@ -34,6 +36,7 @@ def home(request):
         "localities": localities,
         "treatments": treatments,
         "problems": problems,
+        "latest_posts": latest_posts,
         "page_source": "home",
         "page_slug": "home",
         "meta_title": f"{settings.SITE_NAME} — Find Verified Dentists Near You",

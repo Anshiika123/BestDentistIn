@@ -1,40 +1,49 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="bg-gradient-to-b from-brand-50 to-white border-b border-gray-100">
-  <div class="max-w-6xl mx-auto px-4 py-16 text-center">
-    <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 leading-tight">
-      Find Verified Dentists in Roorkee
+<section class="bg-gradient-to-b from-[#eef2f0] to-[#faf8f4] border-b border-gray-100">
+  <div class="max-w-6xl mx-auto px-4 py-16 md:py-20 text-center">
+    <h1 class="font-heading text-3xl md:text-5xl font-extrabold text-brand-900 leading-tight">
+      Find a Trusted Dentist Near You
     </h1>
-    <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto">
-      Find verified dentists in Roorkee and contact clinics instantly on WhatsApp or call.
+    <p class="text-lg text-slate-600 mt-4 max-w-2xl mx-auto">
+      Discover verified dental clinics in Roorkee and contact them directly on WhatsApp or phone.
     </p>
 
     <form action="/dentist-in-roorkee/" method="get" class="mt-8 max-w-xl mx-auto flex flex-col sm:flex-row gap-2 bg-white p-2 rounded-xl border border-gray-200 shadow-sm">
-      <select name="locality" class="flex-1 rounded-lg border-0 text-gray-700 focus:ring-2 focus:ring-brand-500 px-3 py-2">
+      <select name="locality" class="flex-1 rounded-lg border-0 bg-slate-50 text-slate-700 focus:ring-2 focus:ring-teal-500 px-3 py-2.5">
         <option value="">Any locality in Roorkee</option>
         {% for locality in localities %}
         <option value="{{ locality.slug }}">{{ locality.name }}</option>
         {% endfor %}
       </select>
-      <select name="treatment" class="flex-1 rounded-lg border-0 text-gray-700 focus:ring-2 focus:ring-brand-500 px-3 py-2">
+      <select name="treatment" class="flex-1 rounded-lg border-0 bg-slate-50 text-slate-700 focus:ring-2 focus:ring-teal-500 px-3 py-2.5">
         <option value="">Any treatment</option>
         {% for t in treatments %}
         <option value="{{ t.slug }}">{{ t.name }}</option>
         {% endfor %}
       </select>
-      <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-2 rounded-lg">
-        Search Clinics
+      <button type="submit" class="bg-brand-700 hover:bg-brand-800 text-white font-bold px-6 py-2.5 rounded-lg">
+        Find Dentists
       </button>
     </form>
+
+    <div class="mt-5 flex flex-wrap gap-2 justify-center">
+      {% for t in treatments|slice:":3" %}
+      <a href="{{ t.get_absolute_url }}" class="bg-white border border-gray-200 text-slate-700 text-sm font-semibold px-4 py-1.5 rounded-full hover:border-brand-400">{{ t.name }}</a>
+      {% endfor %}
+      {% for p in problems|slice:":3" %}
+      <a href="{{ p.get_absolute_url }}" class="bg-white border border-gray-200 text-slate-700 text-sm font-semibold px-4 py-1.5 rounded-full hover:border-brand-400">{{ p.name }}</a>
+      {% endfor %}
+    </div>
   </div>
 </section>
 
 {% if featured_clinics %}
 <section class="max-w-6xl mx-auto px-4 py-14">
   <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-900">Featured Verified Clinics</h2>
-    <a href="/dentist-in-roorkee/" class="text-brand-700 font-medium text-sm hover:underline">View all →</a>
+    <h2 class="font-heading text-2xl font-bold text-brand-900">Featured Verified Clinics</h2>
+    <a href="/dentist-in-roorkee/" class="text-brand-700 font-semibold text-sm hover:underline">View all →</a>
   </div>
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
     {% for clinic in featured_clinics %}
@@ -44,56 +53,91 @@
 </section>
 {% endif %}
 
-<section class="max-w-6xl mx-auto px-4 py-10">
-  <h2 class="text-2xl font-bold text-gray-900 mb-6">Popular Treatments in Roorkee</h2>
+<section id="treatments" class="max-w-6xl mx-auto px-4 py-10 scroll-mt-20">
+  <h2 class="font-heading text-2xl font-bold text-brand-900 mb-6">Popular Treatments in Roorkee</h2>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
     {% for t in treatments %}
-    <a href="{{ t.get_absolute_url }}" class="bg-white border border-gray-200 rounded-xl p-4 text-center hover:border-brand-300 hover:shadow-sm transition">
-      <span class="font-medium text-gray-800">{{ t.name }}</span>
+    <a href="{{ t.get_absolute_url }}" class="bg-white border border-gray-200 rounded-xl p-4 text-center hover:border-teal-300 hover:shadow-sm transition">
+      <span class="font-semibold text-slate-800">{{ t.name }}</span>
     </a>
     {% endfor %}
   </div>
 </section>
 
-<section class="max-w-6xl mx-auto px-4 py-10">
-  <h2 class="text-2xl font-bold text-gray-900 mb-6">Common Dental Problems</h2>
+<section id="problems" class="max-w-6xl mx-auto px-4 py-10 scroll-mt-20">
+  <h2 class="font-heading text-2xl font-bold text-brand-900 mb-6">Common Dental Problems</h2>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
     {% for p in problems %}
-    <a href="{{ p.get_absolute_url }}" class="bg-white border border-gray-200 rounded-xl p-4 text-center hover:border-brand-300 hover:shadow-sm transition">
-      <span class="font-medium text-gray-800">{{ p.name }}</span>
+    <a href="{{ p.get_absolute_url }}" class="bg-white border border-gray-200 rounded-xl p-4 text-center hover:border-teal-300 hover:shadow-sm transition">
+      <span class="font-semibold text-slate-800">{{ p.name }}</span>
     </a>
     {% endfor %}
   </div>
 </section>
 
 <section class="max-w-6xl mx-auto px-4 py-14">
-  <div class="bg-white border border-gray-200 rounded-2xl p-8 grid md:grid-cols-3 gap-8">
+  <div class="bg-white border border-gray-200 rounded-2xl p-8 grid md:grid-cols-4 gap-8">
     <div>
-      <div class="text-brand-600 font-bold text-2xl mb-1">✓</div>
-      <h3 class="font-semibold text-gray-900">Verified Clinics</h3>
-      <p class="text-sm text-gray-600 mt-1">We confirm phone numbers, timings, and Google/website details before marking a clinic verified.</p>
+      <div class="w-9 h-9 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center mb-3">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M4 12l5 5L20 6"></path></svg>
+      </div>
+      <h3 class="font-heading font-bold text-brand-900">Verified Clinic Information</h3>
+      <p class="text-sm text-slate-600 mt-1">We confirm phone numbers, timings, and clinic details before marking a clinic verified.</p>
     </div>
     <div>
-      <div class="text-brand-600 font-bold text-2xl mb-1">⚡</div>
-      <h3 class="font-semibold text-gray-900">Instant Contact</h3>
-      <p class="text-sm text-gray-600 mt-1">Skip the middleman. Message or call clinics directly on WhatsApp — appointments are handled by the clinic.</p>
+      <div class="w-9 h-9 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center mb-3">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.3"></circle></svg>
+      </div>
+      <h3 class="font-heading font-bold text-brand-900">Hyperlocal to Roorkee</h3>
+      <p class="text-sm text-slate-600 mt-1">Browse by locality — Civil Lines, IIT Area, Ramnagar, and more.</p>
     </div>
     <div>
-      <div class="text-brand-600 font-bold text-2xl mb-1">📍</div>
-      <h3 class="font-semibold text-gray-900">Hyperlocal to Roorkee</h3>
-      <p class="text-sm text-gray-600 mt-1">Browse by locality — Civil Lines, IIT Area, Ramnagar, and more — to find a dentist near you.</p>
+      <div class="w-9 h-9 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center mb-3">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H8l-4 4V5z"></path></svg>
+      </div>
+      <h3 class="font-heading font-bold text-brand-900">Direct WhatsApp Contact</h3>
+      <p class="text-sm text-slate-600 mt-1">Message clinics directly — appointments are handled by the clinic, not us.</p>
+    </div>
+    <div>
+      <div class="w-9 h-9 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center mb-3">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>
+      </div>
+      <h3 class="font-heading font-bold text-brand-900">Call Clinics Directly</h3>
+      <p class="text-sm text-slate-600 mt-1">Prefer to talk? Every listing includes a one-tap call button.</p>
     </div>
   </div>
 </section>
 
 <section class="max-w-6xl mx-auto px-4 py-14">
-  <div class="bg-brand-600 rounded-2xl p-8 md:p-12 text-center text-white">
-    <h2 class="text-2xl md:text-3xl font-bold">Run a dental clinic in Roorkee?</h2>
-    <p class="mt-2 text-brand-50">Get discovered by patients searching for dentists near them. Listing is free in Phase 1.</p>
+  <div class="bg-brand-800 rounded-2xl p-8 md:p-12 text-center text-white">
+    <h2 class="font-heading text-2xl md:text-3xl font-bold">Want more patients for your clinic?</h2>
+    <p class="mt-2 text-slate-200">List your clinic on BestDentistIn and connect with patients searching for dental care nearby. Listing is free in Phase 1.</p>
     <a href="https://wa.me/919999999999?text=Hi%2C%20I%20run%20a%20dental%20clinic%20in%20Roorkee%20and%20want%20to%20list%20it%20on%20BestDentistIn"
-       class="inline-block mt-6 bg-white text-brand-700 font-semibold px-6 py-3 rounded-lg hover:bg-brand-50">
+       class="inline-block mt-6 bg-white text-brand-800 font-bold px-6 py-3 rounded-lg hover:bg-slate-50">
       List Your Clinic on WhatsApp
     </a>
   </div>
 </section>
+
+{% if latest_posts %}
+<section class="max-w-6xl mx-auto px-4 py-14">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="font-heading text-2xl font-bold text-brand-900">Helpful Dental Guides</h2>
+    <a href="{% url 'content:blog_list' %}" class="text-brand-700 font-semibold text-sm hover:underline">Visit the blog →</a>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for post in latest_posts %}
+    <a href="{{ post.get_absolute_url }}" class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition">
+      <div class="h-32 bg-slate-100 flex items-center justify-center text-xs text-slate-400">
+        {% if post.cover_image %}<img src="{{ post.cover_image.url }}" class="w-full h-full object-cover" alt="{{ post.title }}">{% else %}cover image placeholder{% endif %}
+      </div>
+      <div class="p-4">
+        {% if post.category %}<p class="text-xs text-teal-700 font-bold uppercase tracking-wide">{{ post.category.name }}</p>{% endif %}
+        <h3 class="font-heading font-bold text-brand-900 mt-1">{{ post.title }}</h3>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 {% endblock %}

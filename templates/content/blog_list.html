@@ -6,13 +6,13 @@
 </div>
 
 <section class="max-w-6xl mx-auto px-4">
-  <h1 class="text-3xl font-extrabold text-gray-900">Dental Health Blog</h1>
-  <p class="text-gray-600 mt-2">Tips and guides on oral hygiene, tooth pain, root canals, braces, and kids' dentistry.</p>
+  <h1 class="font-heading text-3xl font-extrabold text-brand-900">Dental Health Blog</h1>
+  <p class="text-slate-600 mt-2">Tips and guides on oral hygiene, tooth pain, root canals, braces, and kids' dentistry.</p>
 
   <div class="flex flex-wrap gap-2 mt-6">
-    <a href="{% url 'content:blog_list' %}" class="text-sm px-3 py-1.5 rounded-full border {% if not active_category %}bg-brand-600 text-white border-brand-600{% else %}border-gray-300 text-gray-600{% endif %}">All</a>
+    <a href="{% url 'content:blog_list' %}" class="text-sm font-bold px-3 py-1.5 rounded-full border {% if not active_category %}bg-brand-700 text-white border-brand-700{% else %}border-gray-300 text-slate-600{% endif %}">All</a>
     {% for c in categories %}
-    <a href="?category={{ c.slug }}" class="text-sm px-3 py-1.5 rounded-full border {% if active_category == c.slug %}bg-brand-600 text-white border-brand-600{% else %}border-gray-300 text-gray-600{% endif %}">{{ c.name }}</a>
+    <a href="?category={{ c.slug }}" class="text-sm font-bold px-3 py-1.5 rounded-full border {% if active_category == c.slug %}bg-brand-700 text-white border-brand-700{% else %}border-gray-300 text-slate-600{% endif %}">{{ c.name }}</a>
     {% endfor %}
   </div>
 </section>
@@ -20,24 +20,24 @@
 <section class="max-w-6xl mx-auto px-4 mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
   {% for post in page_obj %}
   <a href="{{ post.get_absolute_url }}" class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition">
-    <div class="h-36 bg-gray-100 flex items-center justify-center text-xs text-gray-400">
-      {% if post.cover_image %}<img src="{{ post.cover_image.url }}" class="w-full h-full object-cover" alt="{{ post.title }}">{% else %}Cover image placeholder{% endif %}
+    <div class="h-36 bg-slate-100 flex items-center justify-center text-xs text-slate-400">
+      {% if post.cover_image %}<img src="{{ post.cover_image.url }}" class="w-full h-full object-cover" alt="{{ post.title }}">{% else %}cover image placeholder{% endif %}
     </div>
     <div class="p-4">
-      {% if post.category %}<p class="text-xs text-brand-600 font-semibold uppercase">{{ post.category.name }}</p>{% endif %}
-      <h2 class="font-semibold text-gray-900 mt-1">{{ post.title }}</h2>
-      <p class="text-sm text-gray-500 mt-2">{{ post.excerpt|default:post.body|truncatewords:20 }}</p>
+      {% if post.category %}<p class="text-xs text-teal-700 font-bold uppercase tracking-wide">{{ post.category.name }}</p>{% endif %}
+      <h2 class="font-heading font-bold text-brand-900 mt-1">{{ post.title }}</h2>
+      <p class="text-sm text-slate-500 mt-2">{{ post.excerpt|default:post.body|truncatewords:20 }}</p>
     </div>
   </a>
   {% empty %}
-  <p class="text-gray-500">No articles yet.</p>
+  <p class="text-slate-500">No articles yet.</p>
   {% endfor %}
 </section>
 
 {% if page_obj.has_other_pages %}
 <div class="max-w-6xl mx-auto px-4 mt-8 flex gap-2">
-  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 border rounded-lg text-sm">Previous</a>{% endif %}
-  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 border rounded-lg text-sm">Next</a>{% endif %}
+  {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 border rounded-lg text-sm font-semibold">Previous</a>{% endif %}
+  {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 border rounded-lg text-sm font-semibold">Next</a>{% endif %}
 </div>
 {% endif %}
 {% endblock %}

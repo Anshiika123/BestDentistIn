@@ -1,11 +1,14 @@
-<div class="bg-white rounded-xl border border-gray-200 hover:shadow-md transition p-5 flex flex-col">
+<div class="bg-white rounded-xl border border-gray-200 hover:shadow-md hover:border-teal-300 transition p-5 flex flex-col h-full">
   <div class="flex items-start justify-between gap-3">
-    <div>
-      <a href="{{ clinic.get_absolute_url }}" class="font-semibold text-gray-900 hover:text-brand-700">{{ clinic.name }}</a>
-      <p class="text-sm text-gray-500 mt-0.5">{{ clinic.locality.name }}, {{ clinic.city.name }}</p>
+    <div class="flex items-start gap-3">
+      <div class="w-10 h-10 rounded-lg bg-brand-50 text-brand-700 font-heading font-bold flex items-center justify-center shrink-0">{{ clinic.name|slice:":1" }}</div>
+      <div>
+        <a href="{{ clinic.get_absolute_url }}" class="font-heading font-bold text-slate-900 hover:text-brand-700">{{ clinic.name }}</a>
+        <p class="text-sm text-slate-500 mt-0.5">{{ clinic.locality.name }}, {{ clinic.city.name }}</p>
+      </div>
     </div>
     {% if clinic.is_verified %}
-    <span class="shrink-0 inline-flex items-center gap-1 bg-brand-50 text-brand-700 text-xs font-semibold px-2 py-1 rounded-full">
+    <span class="shrink-0 inline-flex items-center gap-1 bg-teal-50 text-teal-700 text-xs font-semibold px-2 py-1 rounded-full">
       ✓ Verified
     </span>
     {% endif %}
@@ -13,27 +16,31 @@
 
   {% with dentist=clinic.dentists.first %}
   {% if dentist %}
-  <p class="text-sm text-gray-600 mt-2">Dr. {{ dentist.name }} · {{ dentist.qualification }}</p>
+  <p class="text-sm text-slate-600 mt-3">Dr. {{ dentist.name }} · {{ dentist.qualification }}</p>
   {% endif %}
   {% endwith %}
 
-  <p class="text-sm text-gray-500 mt-1">{{ clinic.timings }}</p>
+  <p class="text-sm text-slate-500 mt-1">{{ clinic.timings }}</p>
 
   <div class="flex flex-wrap gap-1.5 mt-3">
-    {% for t in clinic.treatments.all|slice:":4" %}
-    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{{ t.name }}</span>
+    {% for t in clinic.treatments.all|slice:":3" %}
+    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">{{ t.name }}</span>
     {% endfor %}
   </div>
 
+  {% if clinic.consultation_fee %}
+  <p class="text-sm font-semibold text-brand-800 mt-3">₹{{ clinic.consultation_fee }} consultation</p>
+  {% endif %}
+
   <div class="mt-4 grid grid-cols-2 gap-2">
     <a href="{% url 'leads:track_call' clinic.slug %}?source={{ page_source|default:'city' }}{% if page_slug %}&page_slug={{ page_slug }}{% endif %}{% if treatment %}&treatment={{ treatment.slug }}{% endif %}{% if problem %}&problem={{ problem.slug }}{% endif %}{% if intake_id %}&intake={{ intake_id }}{% endif %}"
-       class="text-center text-sm font-semibold border border-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-50">
+       class="text-center text-sm font-bold border-[1.5px] border-brand-700 text-brand-700 rounded-lg py-2.5 hover:bg-brand-50">
       Call
     </a>
     <a href="{% url 'leads:track_whatsapp' clinic.slug %}?source={{ page_source|default:'city' }}{% if page_slug %}&page_slug={{ page_slug }}{% endif %}{% if treatment %}&treatment={{ treatment.slug }}{% endif %}{% if problem %}&problem={{ problem.slug }}{% endif %}{% if intake_id %}&intake={{ intake_id }}{% endif %}"
-       class="text-center text-sm font-semibold bg-brand-600 text-white rounded-lg py-2 hover:bg-brand-700">
+       class="text-center text-sm font-bold text-[#08341c] bg-[#25D366] rounded-lg py-2.5 hover:brightness-95">
       WhatsApp
     </a>
   </div>
-  <a href="{{ clinic.get_absolute_url }}" class="text-center text-sm text-brand-700 font-medium mt-3 hover:underline">View Profile →</a>
+  <a href="{{ clinic.get_absolute_url }}" class="text-center text-sm text-brand-700 font-semibold mt-3 hover:underline">View Profile →</a>
 </div>

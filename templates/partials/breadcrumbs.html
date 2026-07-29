@@ -1,14 +1,14 @@
 {# Expects `crumbs`: a list of (label, url) tuples. Last item's url can be blank/current. #}
-<nav aria-label="Breadcrumb" class="text-sm text-gray-500 mb-4">
-  <ol class="flex flex-wrap items-center gap-1">
-    <li><a href="{% url 'home' %}" class="hover:text-brand-600">Home</a></li>
+<nav aria-label="Breadcrumb" class="text-sm text-slate-500 mb-4">
+  <ol class="flex flex-wrap items-center gap-1.5">
+    <li><a href="{% url 'home' %}" class="hover:text-brand-700">Home</a></li>
     {% for label, url in crumbs %}
-    <li class="flex items-center gap-1">
-      <span class="text-gray-300">/</span>
+    <li class="flex items-center gap-1.5">
+      <span class="text-slate-300">/</span>
       {% if url %}
-      <a href="{{ url }}" class="hover:text-brand-600">{{ label }}</a>
+      <a href="{{ url }}" class="hover:text-brand-700">{{ label }}</a>
       {% else %}
-      <span class="text-gray-700 font-medium">{{ label }}</span>
+      <span class="text-slate-700 font-semibold">{{ label }}</span>
       {% endif %}
     </li>
     {% endfor %}

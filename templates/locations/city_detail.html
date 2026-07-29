@@ -6,13 +6,13 @@
 </div>
 
 <section class="max-w-6xl mx-auto px-4">
-  <h1 class="text-3xl font-extrabold text-gray-900">Best Dentists in {{ city.name }}</h1>
-  <div class="prose prose-sm text-gray-600 mt-3 max-w-3xl">
+  <h1 class="font-heading text-3xl font-extrabold text-brand-900">Best Dentists in {{ city.name }}</h1>
+  <div class="text-slate-600 mt-3 max-w-3xl leading-relaxed">
     {% if city.intro_content %}
       <p>{{ city.intro_content|linebreaks }}</p>
     {% else %}
       <p>Looking for a reliable dentist in {{ city.name }}? Browse verified dental clinics across {{ city.name }}'s
-      localities, compare treatments and timings, and message a clinic directly on WhatsApp to book your appointment
+      localities, compare treatments and timings, and message a clinic directly on WhatsApp to enquire
       — no waiting on hold, no middlemen.</p>
     {% endif %}
   </div>
@@ -33,16 +33,16 @@
       {% endfor %}
     </select>
     <input type="number" name="fee_max" placeholder="Max fee (₹)" value="{{ request.GET.fee_max }}" class="rounded-lg border-gray-300 text-sm">
-    <label class="flex items-center gap-2 text-sm text-gray-700">
-      <input type="checkbox" name="verified" value="1" {% if request.GET.verified == "1" %}checked{% endif %} class="rounded border-gray-300 text-brand-600">
+    <label class="flex items-center gap-2 text-sm text-slate-700">
+      <input type="checkbox" name="verified" value="1" {% if request.GET.verified == "1" %}checked{% endif %} class="rounded border-gray-300 text-teal-600">
       Verified only
     </label>
-    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-lg py-2">Apply Filters</button>
+    <button type="submit" class="bg-brand-700 hover:bg-brand-800 text-white text-sm font-bold rounded-lg py-2">Apply Filters</button>
   </form>
 </section>
 
 <section class="max-w-6xl mx-auto px-4 mt-8">
-  <h2 class="text-xl font-bold text-gray-900 mb-4">{{ clinics|length }} clinic{{ clinics|length|pluralize }} found</h2>
+  <h2 class="text-xl font-heading font-bold text-brand-900 mb-4">{{ clinics|length }} clinic{{ clinics|length|pluralize }} found</h2>
   {% if clinics %}
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
     {% for clinic in clinics %}
@@ -50,15 +50,15 @@
     {% endfor %}
   </div>
   {% else %}
-  <p class="text-gray-500">No clinics match these filters yet. Try removing a filter.</p>
+  <p class="text-slate-500">No clinics match these filters yet. Try removing a filter.</p>
   {% endif %}
 </section>
 
 <section class="max-w-6xl mx-auto px-4 mt-12">
-  <h2 class="text-xl font-bold text-gray-900 mb-4">Browse by Locality</h2>
+  <h2 class="text-xl font-heading font-bold text-brand-900 mb-4">Browse by Locality</h2>
   <div class="flex flex-wrap gap-2">
     {% for l in localities %}
-    <a href="/{{ l.url_slug }}/" class="bg-white border border-gray-200 rounded-full px-4 py-2 text-sm text-gray-700 hover:border-brand-300">
+    <a href="/{{ l.url_slug }}/" class="bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-semibold text-slate-700 hover:border-teal-300">
       Dentists in {{ l.name }}
     </a>
     {% endfor %}
@@ -66,10 +66,10 @@
 </section>
 
 <section class="max-w-6xl mx-auto px-4 mt-8">
-  <h2 class="text-xl font-bold text-gray-900 mb-4">Browse by Treatment</h2>
+  <h2 class="text-xl font-heading font-bold text-brand-900 mb-4">Browse by Treatment</h2>
   <div class="flex flex-wrap gap-2">
     {% for t in treatments %}
-    <a href="{{ t.get_absolute_url }}" class="bg-white border border-gray-200 rounded-full px-4 py-2 text-sm text-gray-700 hover:border-brand-300">
+    <a href="{{ t.get_absolute_url }}" class="bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-semibold text-slate-700 hover:border-teal-300">
       {{ t.name }} in {{ city.name }}
     </a>
     {% endfor %}

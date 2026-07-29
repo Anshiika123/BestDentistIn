@@ -6,44 +6,46 @@
 </div>
 
 <section class="max-w-5xl mx-auto px-4">
-  <h1 class="text-3xl font-extrabold text-gray-900">{{ problem.name }} in Roorkee</h1>
+  <h1 class="font-heading text-3xl font-extrabold text-brand-900">Looking for a Dentist for {{ problem.name }} in Roorkee?</h1>
   {% if problem.short_description %}
-  <p class="text-gray-600 mt-2 max-w-2xl">{{ problem.short_description }}</p>
+  <p class="text-slate-600 mt-2 max-w-2xl">{{ problem.short_description }}</p>
   {% endif %}
 
-  <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mt-4 text-sm text-yellow-800 max-w-2xl">
+  <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-4 text-sm text-amber-800 max-w-2xl">
     This content is informational only and is not a medical diagnosis. If you are experiencing severe pain,
     swelling, or bleeding, contact a dentist or seek urgent care immediately.
   </div>
+
+  <a href="/dentist-in-roorkee/?problem={{ problem.slug }}" class="inline-block mt-5 bg-brand-700 hover:bg-brand-800 text-white font-bold px-6 py-2.5 rounded-lg">Find a Dentist for {{ problem.name }}</a>
 </section>
 
 <section class="max-w-5xl mx-auto px-4 mt-8 grid md:grid-cols-3 gap-8">
   <div class="md:col-span-2 space-y-8">
     {% if problem.symptom_explanation %}
     <div>
-      <h2 class="text-lg font-bold text-gray-900 mb-2">Understanding the Symptoms</h2>
-      <p class="text-gray-600 text-sm leading-relaxed">{{ problem.symptom_explanation|linebreaks }}</p>
+      <h2 class="text-lg font-heading font-bold text-brand-900 mb-2">What Can Cause {{ problem.name }}?</h2>
+      <p class="text-slate-600 text-sm leading-relaxed">{{ problem.symptom_explanation|linebreaks }}</p>
     </div>
     {% endif %}
     {% if problem.possible_causes %}
     <div>
-      <h2 class="text-lg font-bold text-gray-900 mb-2">Possible Causes</h2>
-      <p class="text-gray-600 text-sm leading-relaxed">{{ problem.possible_causes|linebreaks }}</p>
+      <h2 class="text-lg font-heading font-bold text-brand-900 mb-2">Possible Causes</h2>
+      <p class="text-slate-600 text-sm leading-relaxed">{{ problem.possible_causes|linebreaks }}</p>
     </div>
     {% endif %}
     {% if problem.when_urgent_care_needed %}
     <div>
-      <h2 class="text-lg font-bold text-gray-900 mb-2">When You Need Urgent Care</h2>
-      <p class="text-gray-600 text-sm leading-relaxed">{{ problem.when_urgent_care_needed|linebreaks }}</p>
+      <h2 class="text-lg font-heading font-bold text-brand-900 mb-2">When You Need Urgent Care</h2>
+      <p class="text-slate-600 text-sm leading-relaxed">{{ problem.when_urgent_care_needed|linebreaks }}</p>
     </div>
     {% endif %}
 
     {% if suggested_treatments %}
     <div>
-      <h2 class="text-lg font-bold text-gray-900 mb-2">Suggested Treatment Categories</h2>
+      <h2 class="text-lg font-heading font-bold text-brand-900 mb-2">Suggested Treatment Categories</h2>
       <div class="flex flex-wrap gap-2">
         {% for t in suggested_treatments %}
-        <a href="{{ t.get_absolute_url }}" class="bg-gray-100 text-gray-700 text-sm px-3 py-1.5 rounded-full hover:bg-gray-200">{{ t.name }}</a>
+        <a href="{{ t.get_absolute_url }}" class="bg-slate-100 text-slate-700 text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-slate-200">{{ t.name }}</a>
         {% endfor %}
       </div>
     </div>
@@ -51,10 +53,10 @@
 
     {% if related_posts %}
     <div>
-      <h2 class="text-lg font-bold text-gray-900 mb-2">Read More</h2>
+      <h2 class="text-lg font-heading font-bold text-brand-900 mb-2">Read More</h2>
       <div class="flex flex-wrap gap-2">
         {% for post in related_posts %}
-        <a href="{{ post.get_absolute_url }}" class="bg-gray-100 text-gray-700 text-sm px-3 py-1.5 rounded-full hover:bg-gray-200">{{ post.title }}</a>
+        <a href="{{ post.get_absolute_url }}" class="bg-slate-100 text-slate-700 text-sm font-semibold px-3 py-1.5 rounded-full hover:bg-slate-200">{{ post.title }}</a>
         {% endfor %}
       </div>
     </div>
@@ -64,15 +66,15 @@
   </div>
 
   <aside>
-    <div class="bg-brand-50 border border-brand-100 rounded-xl p-4 text-sm">
-      <p class="text-brand-900 font-medium">In pain right now?</p>
-      <p class="text-brand-700 mt-1">Message a clinic below on WhatsApp describing "{{ problem.name|lower }}" — most reply within minutes.</p>
+    <div class="bg-teal-50 border border-teal-100 rounded-xl p-4 text-sm">
+      <p class="text-teal-900 font-bold">In pain right now?</p>
+      <p class="text-teal-700 mt-1">Message a clinic below on WhatsApp describing "{{ problem.name|lower }}" — most reply within minutes.</p>
     </div>
   </aside>
 </section>
 
 <section class="max-w-5xl mx-auto px-4 mt-10">
-  <h2 class="text-xl font-bold text-gray-900 mb-4">Clinics That Treat {{ problem.name }} in Roorkee</h2>
+  <h2 class="text-xl font-heading font-bold text-brand-900 mb-4">Clinics That Treat {{ problem.name }} in Roorkee</h2>
   {% if clinics %}
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
     {% for clinic in clinics %}
@@ -80,7 +82,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <p class="text-gray-500">No clinics listed for this problem yet.</p>
+  <p class="text-slate-500">No clinics listed for this problem yet.</p>
   {% endif %}
 </section>
 {% endblock %}
