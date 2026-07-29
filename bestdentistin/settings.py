@@ -128,3 +128,12 @@ PRIMARY_CITY_SLUG = "roorkee"
 VERIFICATION_FRESHNESS_DAYS = config("VERIFICATION_FRESHNESS_DAYS", default=180, cast=int)
 
 LOGIN_URL = "/admin/login/"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {
+        "bestdentistin": {"handlers": ["console"], "level": "INFO", "propagate": False},
+    },
+}

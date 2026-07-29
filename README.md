@@ -1,14 +1,19 @@
-# BestDentistIn — Phase 1 + Phase 2 (Roorkee)
+# BestDentistIn — Phase 1–4 (Roorkee)
 
 Local dental discovery and lead-generation site for **Roorkee only**. Users browse verified
 dentists by city/locality/treatment/problem and contact clinics directly via WhatsApp or
 phone call — every click is logged as a lead. No payments, no centralized booking engine,
 no AI diagnosis.
 
-**Phase 1** built the core discovery product (pages, clinic data, basic lead capture).
-**Phase 2** turns it into an SEO + lead-generation engine: real JSON-LD/breadcrumb schema,
-a page-view analytics layer separate from leads, an internal-linking engine, a sitemap/robots.txt,
-and an internal dashboard for page/content performance. See [Phase 2: SEO & lead generation](#phase-2-seo--lead-generation-engine) below.
+- **Phase 1** — core discovery product (pages, clinic data, basic lead capture).
+- **Phase 2** — SEO + lead-generation engine: JSON-LD/breadcrumb schema, a page-view
+  analytics layer separate from leads, an internal-linking engine, sitemap/robots.txt, and
+  an internal dashboard for page/content performance. See [Phase 2](#phase-2-seo--lead-generation-engine).
+- **Phase 3** — clinic-facing SaaS dashboard (`/portal/`): clinic logins, a lead inbox with
+  status/follow-up workflow, missed-lead tracking, notes, an activity log, and per-clinic
+  analytics. See [Phase 3](#phase-3-clinic-saas-dashboard).
+- **Phase 4** — AI-style patient intake (`/intake/`): a short questionnaire, rule-based
+  problem classification, and clinic routing — explicitly **not** a diagnosis. See [Phase 4](#phase-4-ai-patient-intake).
 
 ## Stack
 
@@ -26,14 +31,18 @@ bestdentistin/
   .env.example
   bestdentistin/          # project settings, root urls
   apps/
-    core/                 # homepage, shared context processor, seed_roorkee command
+    core/                 # homepage, shared context processor, seed_roorkee/seed_portal_demo commands
     locations/             # City, Locality models + city/locality page views
     clinics/               # Clinic, Dentist, Treatment, Problem, Verification, FAQ, Review
     content/                # BlogCategory, BlogPost (+ Phase 2: category↔treatment/problem links)
+    accounts/               # Phase 3: ClinicUser (links a Django User to a Clinic + role)
     leads/                  # Lead model + WhatsApp/Call click-tracking redirect views (CTA-only)
+                             #   + Phase 3: status/follow-up/assignment workflow, LeadNote, LeadActivityLog
+    intake/                 # Phase 4: IntakeSession model, classifier.py, routing.py
     analytics/              # Phase 2: PageView model + track_pageview() — page opens, not leads
     seo/                    # Phase 2: schema.py, breadcrumbs.py, linking.py, sitemaps.py, robots.txt
-    dashboard/              # Staff-only leads/clinics/pages/content-performance dashboard
+    dashboard/              # Staff-only (BestDentistIn ops) leads/clinics/pages/content dashboard
+    portal/                 # Phase 3: clinic-facing SaaS dashboard (/portal/) — separate from dashboard/
   templates/               # all HTML templates (base.html + per-app folders + partials/)
   static/                  # static assets (currently empty — Tailwind is CDN-loaded)
   media/                   # uploaded clinic/dentist/blog images
@@ -50,6 +59,7 @@ cp .env.example .env                # defaults work out of the box for local dev
 
 python manage.py migrate
 python manage.py seed_roorkee       # generates realistic Roorkee seed data (~40 clinics)
+python manage.py seed_portal_demo   # creates clinic portal logins + demo leads (Phase 3 testing)
 python manage.py createsuperuser    # for /admin/ and /dashboard/ access
 
 python manage.py runserver
@@ -63,11 +73,15 @@ Visit:
 - `http://127.0.0.1:8000/treatments/root-canal-treatment/` — treatment page
 - `http://127.0.0.1:8000/problems/tooth-pain/` — problem page
 - `http://127.0.0.1:8000/blog/` — blog
+- `http://127.0.0.1:8000/intake/` — AI-style patient intake (Phase 4)
+- `http://127.0.0.1:8000/portal/login/` — clinic SaaS dashboard (Phase 3, needs `seed_portal_demo`)
 - `http://127.0.0.1:8000/admin/` — Django admin (content management)
-- `http://127.0.0.1:8000/dashboard/` — internal leads dashboard (staff login required)
+- `http://127.0.0.1:8000/dashboard/` — internal (BestDentistIn ops) leads dashboard, staff login required
 
 Re-running `seed_roorkee` is idempotent (`update_or_create` on slugs) — safe to run again
 after pulling new code. Pass `--clinics 50` or `--seed 7` to vary the generated data.
+`seed_portal_demo` is also idempotent (creates/updates by username) — it prints the demo
+login credentials for a few clinics (owner + staff account each, password `clinic12345`).
 
 ## URL / routing design
 
@@ -156,17 +170,18 @@ BlogCategory ──< BlogPost
   custom `intro_content` from the admin.
 - `sitemap.xml` and `robots.txt` are live — see [Phase 2](#phase-2-seo--lead-generation-engine).
 
-## Next steps (post–Phase 2)
+## Next steps (post–Phase 4)
 
 1. Compiled Tailwind build (drop the CDN script) + `django-compressor` or similar.
-2. Public clinic self-signup/claim flow (currently: WhatsApp the team, they get added via admin).
+2. Public clinic self-signup/claim flow (currently: WhatsApp the team, they get added via
+   admin, and Phase 3's `ClinicUser` inline lets an admin create their portal login at the same time).
 3. Real Google Maps embed on clinic pages using `Clinic.map_embed_url`.
 4. Multi-city expansion: `City` and locality-aware routing already generalize; `Treatment`/
    `Problem` are currently global (not city-scoped) — see the Phase 2 section for what that
    means for queries like "braces cost in Dehradun" and the extension path.
-5. WhatsApp Business API bot intake, AI call-bot intake, and appointment routing are
-   explicitly **out of scope** — the `Lead` model's `page_source`/`cta_type`/UTM fields are
-   structured so a future automation layer can consume them without a schema change.
+5. WhatsApp Business API intake, an AI voice call bot, and automatic appointment routing are
+   explicitly **out of scope** — see [Phase 4](#phase-4-ai-patient-intake) for what's built
+   instead (rule-based intake) and the seam to plug a real LLM/voice channel in later.
 6. Premium/featured listings: `Clinic.is_featured` already exists and is used on the
    homepage — a payments/ranking layer can build on top of it later.
 7. Blog CMS: current `BlogPost` model is basic `TextField` body; consider a rich-text or
@@ -175,15 +190,21 @@ BlogCategory ──< BlogPost
    public write path yet).
 9. A real analytics pipeline (GA4/Plausible) alongside `PageView` — the in-house model is
    deliberately minimal (page-level counts for the internal dashboard), not a GA replacement.
+10. Real clinic notifications (email/SMS/WhatsApp) — see `apps/leads/notifications.py`, a
+    documented no-op stub that already sits at the right point in the lead-creation flow.
+11. Clinic staff invite flow — accounts are currently created via Django admin only (by
+    design for Phase 3's scope); a self-service "owner invites staff" flow is a natural next step.
 
-## Admin / dashboard
+## Admin / dashboard / portal — who uses what
 
-- **Django admin** (`/admin/`) is the primary content-management interface: add/edit
-  clinics (with inline dentists, verification records, and FAQs), treatments, problems,
-  blog posts (including category↔treatment/problem links), and view leads/page views (read-only).
-- **`/dashboard/`** is a lightweight, staff-only custom view layer on top of the same data —
-  see [Phase 2 dashboard pages](#dashboard-additions) below. It intentionally does not
-  duplicate admin's CRUD forms.
+- **Django admin** (`/admin/`) — BestDentistIn's internal management backend: add/edit
+  clinics (with inline dentists, verification records, FAQs, and **clinic portal accounts**),
+  treatments, problems, blog posts, and inspect leads/page views/intake sessions (read-only
+  where the data is auto-captured). Only Django staff/superusers use this.
+- **`/dashboard/`** — BestDentistIn's internal SEO/ops dashboard (staff-only), covering leads
+  and content performance *across all clinics*. See [Phase 2 dashboard pages](#dashboard-additions).
+- **`/portal/`** — the clinic's own dashboard (Phase 3), scoped to *their* clinic only. See
+  [Phase 3](#phase-3-clinic-saas-dashboard) below. Clinics never see `/dashboard/` or `/admin/`.
 
 ---
 
@@ -284,3 +305,140 @@ so adding (a) later doesn't require touching the linking or schema layers.
   multi-session attribution.
 - `robots.txt`/`sitemap.xml` are functionally complete but untested against a real search
   console — verify indexing status after the first production deploy.
+
+---
+
+## Phase 3: Clinic SaaS Dashboard
+
+A lightweight, mobile-friendly dashboard at `/portal/` so a clinic can manage its own leads
+without touching Django admin. Deliberately not a CRM: no pipelines, no email sequencing, no
+custom fields — a status, a follow-up date, a note, and an activity log.
+
+### Access model
+
+- **`apps.accounts.ClinicUser`** links a normal Django `auth.User` to one `Clinic` with a
+  `role` (`owner` or `staff`). BestDentistIn staff use plain `is_staff` Django accounts and
+  never get a `ClinicUser` row — the two account systems are intentionally separate
+  (`/admin/`+`/dashboard/` vs. `/portal/`).
+- **Creating accounts**: super admins create clinic logins from the Django admin — open a
+  `Clinic`, and there's a "Clinic users" inline (add a `User` there first via `/admin/auth/user/add/`,
+  or use the `seed_portal_demo` command for local testing). There's no public signup.
+- **Permissions** (`apps/portal/decorators.py`):
+  - `clinic_login_required` — any active `ClinicUser`; scopes every query to `request.clinic_user.clinic`
+    so a clinic can never see another clinic's data (enforced in the view, not just the UI).
+  - `owner_required` — stacked on top for `/portal/settings/`; staff get redirected with a message.
+  - Within a clinic, **staff can only edit leads that are unassigned or assigned to them**
+    (`_can_edit()` in `apps/portal/views.py`); the owner can edit and reassign anything. This is
+    the "staff can view/update assigned leads if allowed" rule from the brief, implemented as
+    "assigned to them, or nobody yet" rather than a separate permission flag.
+
+### Lead workflow
+
+- `Lead` (in `apps.leads`, shared with Phases 1–2) gained: `status`, `follow_up_type`,
+  `follow_up_date`, `assigned_to` (→ `ClinicUser`), `last_contacted_at`, `missed_reason`,
+  `contact_number`, `message`. Setting `status` to Contacted/Scheduled/Visited auto-stamps
+  `last_contacted_at` — see `lead_detail` in `apps/portal/views.py`.
+- **`LeadNote`** — free-text notes, one clinic user's running commentary on a lead.
+- **`LeadActivityLog`** — append-only: every status change, follow-up change, assignment
+  change, and note gets an entry with who did it and when. Shown in the lead detail sidebar
+  and mirrored as a read-only inline in Django admin.
+- **Missed-lead tracking** is deliberately not a background job — `/portal/reminders/` computes
+  it live: any lead still `status=new` more than 24 hours after `created_at` shows up under
+  "Missed / No Response," alongside explicit `follow_up_date` buckets (overdue/today/upcoming).
+  A clinic can also hand-mark a lead `status=missed` with a `missed_reason`.
+
+### Portal pages
+
+| Page | Purpose |
+|---|---|
+| `/portal/login/` | Clinic login (separate from `/admin/login/`) |
+| `/portal/` (overview) | Lead counts, status breakdown, WhatsApp vs. call, recent leads |
+| `/portal/leads/` | Filterable lead inbox (status, CTA type, "assigned to me") |
+| `/portal/leads/<id>/` | Full lead detail: update status/follow-up/assignment, add notes, view activity log |
+| `/portal/analytics/` | Leads by source page, treatment, problem, locality, status |
+| `/portal/reminders/` | Overdue / today / upcoming follow-ups + stale "missed" leads |
+| `/portal/settings/` | Owner-only: edit phone/WhatsApp/timings/fee/about; view team list |
+
+Note what `/portal/settings/` deliberately **doesn't** let a clinic touch: verification status,
+address, treatments/problems offered, or team membership — those stay admin-managed so
+BestDentistIn keeps control of the data that feeds SEO and the "Verified" badge.
+
+---
+
+## Phase 4: AI Patient Intake
+
+A short, structured intake flow at `/intake/` that routes a patient to relevant clinics —
+**it never diagnoses**, and every intake page carries an explicit disclaimer to that effect.
+
+### Why rule-based, not an LLM call
+
+`apps/intake/classifier.py` is a deterministic keyword matcher, not a call to an LLM API. This
+was a deliberate choice for this build, not a shortcut:
+
+- **Honesty**: it never fabricates a diagnosis or a confidence it doesn't have — it either
+  matches a known `Problem` category from phrasing (including a small synonym list — see
+  `SYNONYMS` in `classifier.py`) or it says so and still shows clinics.
+- **No external dependency**: no API key, no network call, no per-request cost, works fully
+  offline in this environment.
+- **Clean upgrade path**: `classify(text)` returns a small `ClassificationResult` dataclass
+  (`problem`, `confidence`, `notes`, `matched_treatments`). Swap the body for a real LLM call
+  (e.g. the Claude API, prompted to return one of the existing `Problem` slugs) and nothing
+  else in the app changes — `intake/views.py` and `intake/routing.py` only depend on that shape.
+
+### Flow
+
+1. **`/intake/`** (`intake_start`) — a single-page form (not a live multi-turn chat — see
+   Future Extensions) asking: problem description, severity, duration, new/existing patient,
+   preferred locality, preferred time, and optional age group/phone/language. A disclaimer
+   banner is shown before and after submission.
+2. On submit, `IntakeSession` is created, `classify()` runs against the description, and
+   `apps/intake/routing.py::match_clinics()` ranks clinics: verified-first, filtered by the
+   matched treatment/problem, preferring the requested locality, falling back to the rest of
+   the city, and finally to any active clinic so results are never empty.
+3. **`/intake/<session_key>/`** (`intake_results`) — shows what was understood (with an
+   explicit "we couldn't confidently match a category" fallback message when the classifier
+   has low confidence), the suggested treatment tags, and the matched clinics with normal
+   WhatsApp/Call CTAs.
+4. Clicking a CTA goes through the *same* `/leads/go/whatsapp/` or `/leads/go/call/` redirect
+   as every other page (`page_source=intake`) — this is what makes "create a lead record" and
+   "outcome tracking" real rather than a separate parallel system: `Lead.intake_session` links
+   back to the `IntakeSession`, and the session's `lead_created`/`selected_clinic` fields get
+   set the moment a CTA is actually clicked (see `apps/leads/views.py::_log_lead`).
+
+### Data model (`apps.intake.IntakeSession`)
+
+Raw inputs (`problem_description`, `urgency`, `duration`, `patient_type`, `preferred_locality`,
+`preferred_time`, `age_group`, `phone`, `language_preference`) are stored separately from the
+routing result (`problem_category`, `suggested_treatments`, `matched_clinics`,
+`selected_clinic`, `confidence_score`, `ai_notes`, `lead_created`) — so it's always inspectable
+in Django admin *why* a patient was routed where they were.
+
+### Safety
+
+- The disclaimer ("informational only, not a diagnosis, not a substitute for a dentist, seek
+  urgent/emergency care for severe symptoms") appears on both the intake form and the results
+  page — not just once.
+- `urgency` is a patient's own self-rating, never presented back as a clinical assessment; a
+  "high" rating only changes the on-page messaging ("contact a clinic directly today"), not
+  any clinical claim.
+- The classifier's `notes`/`confidence_score` are internal (`ai_notes`, visible in admin) —
+  never rendered to the patient as medical output.
+
+### Clinic notifications (stub)
+
+`apps/leads/notifications.py::notify_clinic_of_lead()` fires on every lead — including
+intake-sourced ones — and currently just logs (see the `bestdentistin` logger in `settings.py`).
+Wiring it to real email/SMS/WhatsApp delivery is a Next Step; the function already sits at the
+right point in the flow so that's a delivery-channel change, not an architecture change.
+
+### Future extensions (explicitly not built here)
+
+- **WhatsApp bot intake**: `IntakeSession.source_channel` already has a `whatsapp` choice
+  waiting for a webhook-based view that creates sessions the same way `intake_start` does.
+- **AI voice call bot**: same idea, `source_channel="voice"`.
+- **Multilingual intake**: `language_preference` is captured but not yet used to translate the
+  form or route to language-matching clinics.
+- **A real multi-turn chat UI**: today's intake is a single form, not a conversational back-and-forth
+  — simpler and more reliable to ship, and the data model doesn't need to change to support a
+  chat UI later (it would just populate the same `IntakeSession` fields turn-by-turn instead of
+  all at once).
