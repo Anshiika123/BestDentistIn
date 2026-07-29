@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="max-w-5xl mx-auto px-4 pt-10">
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <h1 class="text-2xl font-extrabold text-gray-900">Reminders</h1>
+    {% include "partials/portal_nav.html" with active="reminders" %}
+  </div>
+
+  {% if overdue %}
+  <div class="mt-6">
+    <h2 class="text-sm font-bold text-red-700 uppercase mb-2">Overdue</h2>
+    <div class="bg-white border border-red-200 rounded-xl divide-y divide-gray-100">
+      {% for lead in overdue %}
+      <a href="{% url 'portal:lead_detail' lead.id %}" class="flex items-center justify-between p-3 hover:bg-gray-50 text-sm">
+        <span>{% firstof lead.treatment.name lead.problem.name "General inquiry" %} · {{ lead.get_cta_type_display }}</span>
+        <span class="text-red-600 font-medium">{{ lead.follow_up_date|date:"M d" }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="mt-6">
+    <h2 class="text-sm font-bold text-gray-700 uppercase mb-2">Today</h2>
+    <div class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
+      {% for lead in today %}
+      <a href="{% url 'portal:lead_detail' lead.id %}" class="flex items-center justify-between p-3 hover:bg-gray-50 text-sm">
+        <span>{% firstof lead.treatment.name lead.problem.name "General inquiry" %} · {{ lead.get_cta_type_display }}</span>
+        <span class="text-gray-500">{{ lead.get_status_display }}</span>
+      </a>
+      {% empty %}
+      <p class="p-3 text-sm text-gray-500">Nothing due today.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mt-6">
+    <h2 class="text-sm font-bold text-gray-700 uppercase mb-2">Upcoming</h2>
+    <div class="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
+      {% for lead in upcoming %}
+      <a href="{% url 'portal:lead_detail' lead.id %}" class="flex items-center justify-between p-3 hover:bg-gray-50 text-sm">
+        <span>{% firstof lead.treatment.name lead.problem.name "General inquiry" %} · {{ lead.get_cta_type_display }}</span>
+        <span class="text-gray-500">{{ lead.follow_up_date|date:"M d" }}</span>
+      </a>
+      {% empty %}
+      <p class="p-3 text-sm text-gray-500">Nothing scheduled.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mt-6">
+    <h2 class="text-sm font-bold text-yellow-700 uppercase mb-2">Missed / No Response (24h+)</h2>
+    <p class="text-xs text-gray-500 mb-2">Leads still marked "New" a full day after coming in — worth a follow-up or a status update.</p>
+    <div class="bg-white border border-yellow-200 rounded-xl divide-y divide-gray-100">
+      {% for lead in missed_no_response %}
+      <a href="{% url 'portal:lead_detail' lead.id %}" class="flex items-center justify-between p-3 hover:bg-gray-50 text-sm">
+        <span>{% firstof lead.treatment.name lead.problem.name "General inquiry" %} · {{ lead.get_cta_type_display }}</span>
+        <span class="text-yellow-700">{{ lead.created_at|date:"M d" }}</span>
+      </a>
+      {% empty %}
+      <p class="p-3 text-sm text-gray-500">Nothing stale right now.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

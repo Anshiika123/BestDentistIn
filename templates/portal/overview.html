@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 pt-10">
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-2xl font-extrabold text-gray-900">{{ clinic.name }}</h1>
+      <p class="text-sm text-gray-500">Clinic Dashboard</p>
+    </div>
+    {% include "partials/portal_nav.html" with active="overview" %}
+  </div>
+
+  <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <p class="text-xs text-gray-400 uppercase font-semibold">Total Leads</p>
+      <p class="text-2xl font-bold text-gray-900 mt-1">{{ total_leads }}</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <p class="text-xs text-gray-400 uppercase font-semibold">New Leads</p>
+      <p class="text-2xl font-bold text-gray-900 mt-1">{{ new_leads }}</p>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-4">
+      <p class="text-xs text-gray-400 uppercase font-semibold">Follow-up Today</p>
+      <p class="text-2xl font-bold text-gray-900 mt-1">{{ follow_up_today }}</p>
+    </div>
+    <div class="bg-white border border-red-200 rounded-xl p-4 bg-red-50">
+      <p class="text-xs text-red-500 uppercase font-semibold">Missed / No Response</p>
+      <p class="text-2xl font-bold text-red-700 mt-1">{{ missed_or_stale }}</p>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6 mt-8">
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <h2 class="font-semibold text-gray-900 mb-3">Leads by Status</h2>
+      <ul class="space-y-2 text-sm">
+        {% for row in status_counts %}
+        <li class="flex justify-between border-b border-gray-100 pb-2">
+          <span class="text-gray-600">{{ row.status }}</span>
+          <span class="font-medium text-gray-900">{{ row.total }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <h2 class="font-semibold text-gray-900 mb-3">WhatsApp vs Call</h2>
+      <div class="flex items-center gap-6">
+        <div>
+          <p class="text-3xl font-bold text-brand-600">{{ whatsapp_leads }}</p>
+          <p class="text-xs text-gray-500 uppercase font-semibold">WhatsApp</p>
+        </div>
+        <div>
+          <p class="text-3xl font-bold text-gray-700">{{ call_leads }}</p>
+          <p class="text-xs text-gray-500 uppercase font-semibold">Call</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-5 mt-8">
+    <h2 class="font-semibold text-gray-900 mb-3">Recent Leads</h2>
+    <table class="w-full text-sm">
+      <thead class="text-left text-gray-400 uppercase text-xs">
+        <tr><th class="py-2">CTA</th><th>Source</th><th>Treatment/Problem</th><th>Status</th><th>When</th><th></th></tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for lead in recent_leads %}
+        <tr>
+          <td class="py-2">{{ lead.get_cta_type_display }}</td>
+          <td>{{ lead.get_page_source_display }}</td>
+          <td>{% firstof lead.treatment.name lead.problem.name "—" %}</td>
+          <td>{{ lead.get_status_display }}</td>
+          <td>{{ lead.created_at|date:"M d, H:i" }}</td>
+          <td><a href="{% url 'portal:lead_detail' lead.id %}" class="text-brand-600 hover:underline">View</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="py-4 text-gray-500">No leads yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

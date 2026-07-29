@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 pt-10">
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <h1 class="text-2xl font-extrabold text-gray-900">Leads</h1>
+    {% include "partials/portal_nav.html" with active="leads" %}
+  </div>
+
+  <form method="get" class="flex flex-wrap gap-3 mt-6">
+    <select name="status" class="rounded-lg border-gray-300 text-sm">
+      <option value="">All statuses</option>
+      {% for value, label in status_choices %}
+      <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="cta_type" class="rounded-lg border-gray-300 text-sm">
+      <option value="">All CTA types</option>
+      {% for value, label in cta_choices %}
+      <option value="{{ value }}" {% if request.GET.cta_type == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <label class="flex items-center gap-2 text-sm text-gray-700">
+      <input type="checkbox" name="mine" value="1" {% if mine_only %}checked{% endif %} class="rounded border-gray-300 text-brand-600">
+      Assigned to me
+    </label>
+    <button class="bg-brand-600 text-white text-sm font-semibold rounded-lg px-4">Filter</button>
+  </form>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-5 mt-6 overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="text-left text-gray-400 uppercase text-xs">
+        <tr>
+          <th class="py-2">CTA</th><th>Source</th><th>Treatment/Problem</th><th>Contact</th>
+          <th>Status</th><th>Follow-up</th><th>Assigned</th><th>When</th><th></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for lead in leads %}
+        <tr>
+          <td class="py-2">{{ lead.get_cta_type_display }}</td>
+          <td>{{ lead.get_page_source_display }}</td>
+          <td>{% firstof lead.treatment.name lead.problem.name "—" %}</td>
+          <td>{{ lead.contact_number|default:"—" }}</td>
+          <td>
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold
+              {% if lead.status == 'new' %}bg-blue-100 text-blue-700
+              {% elif lead.status == 'missed' or lead.status == 'not_reachable' %}bg-red-100 text-red-700
+              {% elif lead.status == 'scheduled' or lead.status == 'visited' %}bg-green-100 text-green-700
+              {% else %}bg-gray-100 text-gray-700{% endif %}">
+              {{ lead.get_status_display }}
+            </span>
+          </td>
+          <td>{{ lead.get_follow_up_type_display }}{% if lead.follow_up_date %} ({{ lead.follow_up_date|date:"M d" }}){% endif %}</td>
+          <td>{{ lead.assigned_to.user.username|default:"Unassigned" }}</td>
+          <td>{{ lead.created_at|date:"M d, H:i" }}</td>
+          <td><a href="{% url 'portal:lead_detail' lead.id %}" class="text-brand-600 hover:underline">View</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="py-4 text-gray-500">No leads match these filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

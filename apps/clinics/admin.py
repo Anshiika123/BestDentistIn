@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from apps.accounts.models import ClinicUser
+
 from .models import Clinic, ClinicFAQ, Dentist, Problem, Review, Treatment, VerificationRecord
 
 
@@ -19,6 +21,14 @@ class ClinicFAQInline(admin.TabularInline):
     fk_name = "clinic"
 
 
+class ClinicUserInline(admin.TabularInline):
+    """Lets a super admin create/assign clinic portal accounts from the clinic page."""
+
+    model = ClinicUser
+    extra = 0
+    fields = ("user", "role", "phone", "is_active")
+
+
 @admin.register(Clinic)
 class ClinicAdmin(admin.ModelAdmin):
     list_display = (
@@ -34,7 +44,7 @@ class ClinicAdmin(admin.ModelAdmin):
     search_fields = ("name", "address", "phone_number", "whatsapp_number")
     prepopulated_fields = {"slug": ("name",)}
     filter_horizontal = ("treatments", "problems")
-    inlines = [DentistInline, VerificationInline, ClinicFAQInline]
+    inlines = [DentistInline, VerificationInline, ClinicFAQInline, ClinicUserInline]
 
     @admin.display(boolean=True, description="Verified")
     def verified_badge(self, obj):

@@ -26,11 +26,11 @@
   </div>
 
   <div class="mt-4 grid grid-cols-2 gap-2">
-    <a href="{% url 'leads:track_call' clinic.slug %}?source={{ page_source|default:'city' }}{% if page_slug %}&page_slug={{ page_slug }}{% endif %}{% if treatment %}&treatment={{ treatment.slug }}{% endif %}{% if problem %}&problem={{ problem.slug }}{% endif %}"
+    <a href="{% url 'leads:track_call' clinic.slug %}?source={{ page_source|default:'city' }}{% if page_slug %}&page_slug={{ page_slug }}{% endif %}{% if treatment %}&treatment={{ treatment.slug }}{% endif %}{% if problem %}&problem={{ problem.slug }}{% endif %}{% if intake_id %}&intake={{ intake_id }}{% endif %}"
        class="text-center text-sm font-semibold border border-gray-300 text-gray-700 rounded-lg py-2 hover:bg-gray-50">
       Call
     </a>
-    <a href="{% url 'leads:track_whatsapp' clinic.slug %}?source={{ page_source|default:'city' }}{% if page_slug %}&page_slug={{ page_slug }}{% endif %}{% if treatment %}&treatment={{ treatment.slug }}{% endif %}{% if problem %}&problem={{ problem.slug }}{% endif %}"
+    <a href="{% url 'leads:track_whatsapp' clinic.slug %}?source={{ page_source|default:'city' }}{% if page_slug %}&page_slug={{ page_slug }}{% endif %}{% if treatment %}&treatment={{ treatment.slug }}{% endif %}{% if problem %}&problem={{ problem.slug }}{% endif %}{% if intake_id %}&intake={{ intake_id }}{% endif %}"
        class="text-center text-sm font-semibold bg-brand-600 text-white rounded-lg py-2 hover:bg-brand-700">
       WhatsApp
     </a>

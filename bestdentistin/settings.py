@@ -31,10 +31,13 @@ INSTALLED_APPS = [
     "apps.locations",
     "apps.clinics",
     "apps.content",
+    "apps.accounts",
     "apps.leads",
+    "apps.intake",
     "apps.analytics",
     "apps.seo",
     "apps.dashboard",
+    "apps.portal",
 ]
 
 MIDDLEWARE = [

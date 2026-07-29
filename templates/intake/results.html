@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block meta_title %}Your Matched Clinics | BestDentistIn{% endblock %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 pt-10 pb-16">
+  <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-800 mb-6">
+    This is informational only, not a diagnosis, and not a substitute for seeing a dentist.
+    If your symptoms are severe or worsening, contact a clinic or emergency care right away.
+  </div>
+
+  <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900">Here's what we found</h1>
+
+  <div class="bg-white border border-gray-200 rounded-2xl p-6 mt-6">
+    <p class="text-sm text-gray-500 uppercase font-semibold tracking-wide">You told us</p>
+    <p class="text-gray-800 mt-1">"{{ session.problem_description }}"</p>
+
+    {% if session.problem_category %}
+    <div class="mt-4 flex items-center gap-2">
+      <span class="text-sm text-gray-600">This may be related to:</span>
+      <a href="{{ session.problem_category.get_absolute_url }}" class="bg-brand-50 text-brand-700 text-sm font-semibold px-3 py-1 rounded-full hover:bg-brand-100">
+        {{ session.problem_category.name }}
+      </a>
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-500 mt-4">We couldn't confidently match a specific category from your description — that's okay, the clinics below can still help. Describe your symptoms directly to them.</p>
+    {% endif %}
+
+    {% if session.suggested_treatments.all %}
+    <div class="mt-3 flex flex-wrap gap-2">
+      {% for t in session.suggested_treatments.all %}
+      <a href="{{ t.get_absolute_url }}" class="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-full hover:bg-gray-200">{{ t.name }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if session.urgency == "high" %}
+    <p class="text-sm text-red-700 mt-4 font-medium">You marked this as severe — we'd recommend contacting a clinic directly today rather than waiting.</p>
+    {% endif %}
+  </div>
+
+  <h2 class="text-xl font-bold text-gray-900 mt-10 mb-4">
+    {% if session.preferred_locality %}Clinics near {{ session.preferred_locality.name }}{% else %}Matching Clinics{% endif %}
+  </h2>
+
+  {% if clinics %}
+  <div class="grid sm:grid-cols-2 gap-5">
+    {% for clinic in clinics %}
+      {% include "partials/clinic_card.html" with clinic=clinic page_source="intake" page_slug=page_slug intake_id=session.id problem=session.problem_category %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-gray-500">No matching clinics found yet — try browsing <a href="/dentist-in-roorkee/" class="text-brand-600 hover:underline">all dentists in Roorkee</a> instead.</p>
+  {% endif %}
+
+  <p class="text-xs text-gray-400 mt-8">
+    Routing is based on keyword matching against clinic-listed treatments, not a medical assessment.
+    Appointments are confirmed directly by the clinic, not by BestDentistIn.
+  </p>
+</section>
+{% endblock %}

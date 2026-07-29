@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from apps.clinics.models import Clinic, Problem, Treatment
 
 from .models import Lead
+from .notifications import notify_clinic_of_lead
 
 UTM_FIELDS = ("utm_source", "utm_medium", "utm_campaign")
 
@@ -49,7 +50,14 @@ def _resolve_context(request, clinic):
 
     page_slug = request.GET.get("page_slug", "")[:220]
 
-    return page_source, treatment, problem, page_slug
+    intake_session = None
+    intake_id = request.GET.get("intake")
+    if intake_id:
+        from apps.intake.models import IntakeSession
+
+        intake_session = IntakeSession.objects.filter(id=intake_id).first()
+
+    return page_source, treatment, problem, page_slug, intake_session
 
 
 def _build_whatsapp_message(clinic, page_source, treatment, problem):
@@ -63,11 +71,17 @@ def _build_whatsapp_message(clinic, page_source, treatment, problem):
     return f"{base} and want to book an appointment in {clinic.city.name}."
 
 
-def _log_lead(request, clinic, cta_type, page_source, treatment, problem, page_slug):
+def _log_lead(request, clinic, cta_type, page_source, treatment, problem, page_slug, intake_session):
     cta_label = request.GET.get("label", "")[:100] or DEFAULT_CTA_LABELS.get(cta_type, "")
     utm = _resolve_utm(request)
 
-    Lead.objects.create(
+    contact_number = ""
+    message = ""
+    if intake_session:
+        contact_number = intake_session.phone
+        message = intake_session.problem_description
+
+    lead = Lead.objects.create(
         clinic=clinic,
         city=clinic.city,
         locality=clinic.locality,
@@ -77,17 +91,28 @@ def _log_lead(request, clinic, cta_type, page_source, treatment, problem, page_s
         cta_label=cta_label,
         treatment=treatment,
         problem=problem,
+        intake_session=intake_session,
+        contact_number=contact_number,
+        message=message,
         referrer_url=request.META.get("HTTP_REFERER", "")[:300],
         user_agent=request.META.get("HTTP_USER_AGENT", "")[:300],
         ip_address=_client_ip(request),
         **utm,
     )
 
+    if intake_session:
+        intake_session.selected_clinic = clinic
+        intake_session.lead_created = True
+        intake_session.save(update_fields=["selected_clinic", "lead_created"])
+
+    notify_clinic_of_lead(lead)
+    return lead
+
 
 def track_whatsapp(request, clinic_slug):
     clinic = get_object_or_404(Clinic, slug=clinic_slug, is_active=True)
-    page_source, treatment, problem, page_slug = _resolve_context(request, clinic)
-    _log_lead(request, clinic, Lead.CtaType.WHATSAPP, page_source, treatment, problem, page_slug)
+    page_source, treatment, problem, page_slug, intake_session = _resolve_context(request, clinic)
+    _log_lead(request, clinic, Lead.CtaType.WHATSAPP, page_source, treatment, problem, page_slug, intake_session)
 
     message = _build_whatsapp_message(clinic, page_source, treatment, problem)
     url = f"https://wa.me/{clinic.whatsapp_number}?text={quote(message)}"
@@ -96,8 +121,8 @@ def track_whatsapp(request, clinic_slug):
 
 def track_call(request, clinic_slug):
     clinic = get_object_or_404(Clinic, slug=clinic_slug, is_active=True)
-    page_source, treatment, problem, page_slug = _resolve_context(request, clinic)
-    _log_lead(request, clinic, Lead.CtaType.CALL, page_source, treatment, problem, page_slug)
+    page_source, treatment, problem, page_slug, intake_session = _resolve_context(request, clinic)
+    _log_lead(request, clinic, Lead.CtaType.CALL, page_source, treatment, problem, page_slug, intake_session)
 
     # HttpResponseRedirect rejects non-http(s)/ftp schemes as "unsafe", but tel: is
     # exactly what we want here — build the redirect response manually instead.

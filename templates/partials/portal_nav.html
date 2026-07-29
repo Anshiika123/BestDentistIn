@@ -1,0 +1,11 @@
+{# Expects `active`: one of overview|leads|analytics|reminders|settings #}
+<nav class="flex flex-wrap gap-4 text-sm font-medium">
+  <a href="{% url 'portal:overview' %}" class="{% if active == 'overview' %}text-brand-700{% else %}text-gray-500 hover:text-brand-700{% endif %}">Overview</a>
+  <a href="{% url 'portal:leads_list' %}" class="{% if active == 'leads' %}text-brand-700{% else %}text-gray-500 hover:text-brand-700{% endif %}">Leads</a>
+  <a href="{% url 'portal:reminders' %}" class="{% if active == 'reminders' %}text-brand-700{% else %}text-gray-500 hover:text-brand-700{% endif %}">Reminders</a>
+  <a href="{% url 'portal:analytics' %}" class="{% if active == 'analytics' %}text-brand-700{% else %}text-gray-500 hover:text-brand-700{% endif %}">Analytics</a>
+  {% if request.clinic_user.is_owner %}
+  <a href="{% url 'portal:settings' %}" class="{% if active == 'settings' %}text-brand-700{% else %}text-gray-500 hover:text-brand-700{% endif %}">Settings</a>
+  {% endif %}
+  <a href="{% url 'portal:logout' %}" class="text-gray-400 hover:text-red-600">Log out</a>
+</nav>

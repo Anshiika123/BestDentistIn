@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="max-w-sm mx-auto px-4 pt-16">
+  <div class="text-center mb-6">
+    <h1 class="text-2xl font-extrabold text-gray-900">Clinic Login</h1>
+    <p class="text-gray-500 text-sm mt-1">Manage your leads and follow-ups.</p>
+  </div>
+
+  <form method="post" class="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+    {% csrf_token %}
+    {% if form.errors %}
+    <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+      Incorrect username or password.
+    </div>
+    {% endif %}
+    <div>
+      <label class="block text-sm font-semibold text-gray-800 mb-1">Username</label>
+      {{ form.username }}
+    </div>
+    <div>
+      <label class="block text-sm font-semibold text-gray-800 mb-1">Password</label>
+      {{ form.password }}
+    </div>
+    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg py-2.5">
+      Log In
+    </button>
+  </form>
+  <p class="text-center text-xs text-gray-400 mt-4">Clinic accounts are created by BestDentistIn — contact support if you need access.</p>
+</section>
+{% endblock %}

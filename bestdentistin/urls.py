@@ -11,7 +11,9 @@ from apps.seo.views import robots_txt
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("dashboard/", include("apps.dashboard.urls")),
+    path("portal/", include("apps.portal.urls")),
     path("leads/", include("apps.leads.urls")),
+    path("intake/", include("apps.intake.urls")),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
     path("robots.txt", robots_txt, name="robots_txt"),
     path("", core_views.home, name="home"),
