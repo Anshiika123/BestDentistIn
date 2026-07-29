@@ -1,25 +1,63 @@
-# BestDentistIn — Phase 1–4 (Roorkee)
+# BestDentistIn 🦷
 
-Local dental discovery and lead-generation site for **Roorkee only**. Users browse verified
-dentists by city/locality/treatment/problem and contact clinics directly via WhatsApp or
-phone call — every click is logged as a lead. No payments, no centralized booking engine,
-no AI diagnosis.
+**A local dental discovery and lead-generation platform — built for Roorkee, designed to scale to any city.**
 
-- **Phase 1** — core discovery product (pages, clinic data, basic lead capture).
-- **Phase 2** — SEO + lead-generation engine: JSON-LD/breadcrumb schema, a page-view
-  analytics layer separate from leads, an internal-linking engine, sitemap/robots.txt, and
-  an internal dashboard for page/content performance. See [Phase 2](#phase-2-seo--lead-generation-engine).
-- **Phase 3** — clinic-facing SaaS dashboard (`/portal/`): clinic logins, a lead inbox with
-  status/follow-up workflow, missed-lead tracking, notes, an activity log, and per-clinic
-  analytics. See [Phase 3](#phase-3-clinic-saas-dashboard).
-- **Phase 4** — AI-style patient intake (`/intake/`): a short questionnaire, rule-based
-  problem classification, and clinic routing — explicitly **not** a diagnosis. See [Phase 4](#phase-4-ai-patient-intake).
+Users search for dentists by city, locality, treatment, or problem, and connect with clinics directly via WhatsApp or phone call. Every click is tracked as a lead. No payments, no centralized booking engine, no AI diagnosis — just a fast, honest path from search to a clinic's front desk.
 
-## Stack
+[![Django](https://img.shields.io/badge/Django-6.0-092E20?logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
+---
+
+## Table of contents
+
+- [What this is](#what-this-is)
+- [Feature overview](#feature-overview)
+- [Tech stack](#tech-stack)
+- [Project layout](#project-layout)
+- [Getting started](#getting-started)
+- [URL map](#url-map)
+- [Data model](#data-model)
+- [What's mocked vs. production-ready](#whats-mocked-vs-production-ready)
+- [Roadmap](#roadmap)
+- [Who uses what: admin vs. dashboard vs. portal](#who-uses-what-admin-vs-dashboard-vs-portal)
+- [Deep dive: Phase 2 – SEO & lead-gen engine](#phase-2-seo--lead-generation-engine)
+- [Deep dive: Phase 3 – clinic SaaS dashboard](#phase-3-clinic-saas-dashboard)
+- [Deep dive: Phase 4 – AI-style patient intake](#phase-4-ai-patient-intake)
+- [Design notes](#design-notes)
+
+---
+
+## What this is
+
+BestDentistIn was built in four phases, each shipping a working, demoable slice:
+
+| Phase | What it adds |
+|---|---|
+| **1 — Core discovery** | City/locality/treatment/problem pages, clinic profiles, WhatsApp & call lead capture |
+| **2 — SEO & lead-gen engine** | JSON-LD/breadcrumb schema, page-view analytics (separate from leads), internal linking, sitemap/robots.txt, internal ops dashboard |
+| **3 — Clinic SaaS dashboard** | `/portal/` — clinic logins, lead inbox with status/follow-up workflow, missed-lead tracking, notes, activity log, per-clinic analytics |
+| **4 — AI-style patient intake** | `/intake/` — short questionnaire, rule-based problem classification, clinic routing (explicitly *not* a diagnosis) |
+
+Roorkee is the only seeded city today, but the schema (`City` → `Locality`, city-scoped `Treatment`/`Problem`) is already built for multi-city expansion.
+
+## Feature overview
+
+- 🔍 **Discovery pages** for city, locality, treatment, and problem — each with real, non-duplicated content (unique FAQs, clinic lists, intro copy)
+- 📲 **Lead capture** — every WhatsApp/call CTA routes through a tracking redirect before firing, so no click goes unlogged
+- ✅ **Verification badge** — driven by a time-boxed `VerificationRecord`, not a static flag
+- 📈 **SEO scaffolding** — canonical tags, breadcrumbs, JSON-LD (`Dentist`/`ItemList`/`Article`), sitemap, robots.txt
+- 🧭 **Internal dashboard** (staff-only) — leads, page performance, and content breakdowns by city/treatment/problem
+- 🏥 **Clinic portal** — a scoped, mobile-friendly SaaS dashboard for clinics to manage their own leads
+- 🤖 **Patient intake** — rule-based symptom classification and clinic routing, with a clean seam to swap in a real LLM later
+- 🧩 **Clean separation** — leads (conversions) and page views (traffic) are tracked in entirely separate tables, never conflated
+
+## Tech stack
 
 - **Backend**: Django 6 (Python 3.12)
 - **Database**: SQLite for local dev, PostgreSQL-ready for production (env-switchable)
-- **Frontend**: Django templates + Tailwind CSS (via CDN in Phase 1 — see note below)
+- **Frontend**: Django templates + Tailwind CSS (CDN in this build — see [mocked vs. production-ready](#whats-mocked-vs-production-ready))
 - **Media**: Django's built-in static/media handling
 
 ## Project layout
@@ -36,7 +74,7 @@ bestdentistin/
     clinics/               # Clinic, Dentist, Treatment, Problem, Verification, FAQ, Review
     content/                # BlogCategory, BlogPost (+ Phase 2: category↔treatment/problem links)
     accounts/               # Phase 3: ClinicUser (links a Django User to a Clinic + role)
-    leads/                  # Lead model + WhatsApp/Call click-tracking redirect views (CTA-only)
+    leads/                  # Lead model + WhatsApp/Call click-tracking redirect views
                              #   + Phase 3: status/follow-up/assignment workflow, LeadNote, LeadActivityLog
     intake/                 # Phase 4: IntakeSession model, classifier.py, routing.py
     analytics/              # Phase 2: PageView model + track_pageview() — page opens, not leads
@@ -49,7 +87,7 @@ bestdentistin/
   fixtures/                # (reserved for exported fixtures if needed)
 ```
 
-## Setup & run instructions
+## Getting started
 
 ```bash
 python -m venv venv
@@ -65,43 +103,42 @@ python manage.py createsuperuser    # for /admin/ and /dashboard/ access
 python manage.py runserver
 ```
 
-Visit:
-- `http://127.0.0.1:8000/` — homepage
-- `http://127.0.0.1:8000/dentist-in-roorkee/` — city page
-- `http://127.0.0.1:8000/dentist-in-roorkee-civil-lines/` — locality page
-- `http://127.0.0.1:8000/clinic/<slug>/` — clinic profile
-- `http://127.0.0.1:8000/treatments/root-canal-treatment/` — treatment page
-- `http://127.0.0.1:8000/problems/tooth-pain/` — problem page
-- `http://127.0.0.1:8000/blog/` — blog
-- `http://127.0.0.1:8000/intake/` — AI-style patient intake (Phase 4)
-- `http://127.0.0.1:8000/portal/login/` — clinic SaaS dashboard (Phase 3, needs `seed_portal_demo`)
-- `http://127.0.0.1:8000/admin/` — Django admin (content management)
-- `http://127.0.0.1:8000/dashboard/` — internal (BestDentistIn ops) leads dashboard, staff login required
+Then visit:
 
-Re-running `seed_roorkee` is idempotent (`update_or_create` on slugs) — safe to run again
-after pulling new code. Pass `--clinics 50` or `--seed 7` to vary the generated data.
-`seed_portal_demo` is also idempotent (creates/updates by username) — it prints the demo
-login credentials for a few clinics (owner + staff account each, password `clinic12345`).
+| URL | What you'll see |
+|---|---|
+| `/` | Homepage |
+| `/dentist-in-roorkee/` | City page |
+| `/dentist-in-roorkee-civil-lines/` | Locality page |
+| `/clinic/<slug>/` | Clinic profile |
+| `/treatments/root-canal-treatment/` | Treatment page |
+| `/problems/tooth-pain/` | Problem page |
+| `/blog/` | Blog |
+| `/intake/` | AI-style patient intake |
+| `/portal/login/` | Clinic SaaS dashboard (needs `seed_portal_demo`) |
+| `/admin/` | Django admin |
+| `/dashboard/` | Internal ops dashboard (staff login required) |
 
-## URL / routing design
+`seed_roorkee` and `seed_portal_demo` are both idempotent — safe to re-run after pulling new code. Pass `--clinics 50` or `--seed 7` to `seed_roorkee` to vary the generated data. `seed_portal_demo` prints demo login credentials for a few clinics (owner + staff account each, password `clinic12345`).
+
+## URL map
 
 | Path | View | Notes |
 |---|---|---|
 | `/` | `core.views.home` | |
-| `/dentist-in-<rest>/` | `locations.views.city_or_locality` | Single route resolves both the city page (`rest == "roorkee"`) and locality pages (`rest == "roorkee-civil-lines"`) by matching `rest` against `<city.slug>-<locality.slug>`. Avoids duplicating near-identical view logic across two URL patterns while keeping the exact `/dentist-in-roorkee-civil-lines/` URL shape from the spec. |
+| `/dentist-in-<rest>/` | `locations.views.city_or_locality` | One route resolves both city (`rest == "roorkee"`) and locality (`rest == "roorkee-civil-lines"`) pages by matching against `<city.slug>-<locality.slug>` |
 | `/clinic/<slug>/` | `clinics.views.clinic_detail` | |
 | `/treatments/<slug>/` | `clinics.views.treatment_detail` | |
 | `/problems/<slug>/` | `clinics.views.problem_detail` | |
 | `/blog/`, `/blog/<slug>/` | `content.views.*` | |
-| `/leads/go/whatsapp/<clinic_slug>/` | `leads.views.track_whatsapp` | Logs a `Lead`, then 302s to a `wa.me` link with a dynamically prefilled message. |
-| `/leads/go/call/<clinic_slug>/` | `leads.views.track_call` | Logs a `Lead`, then 302s to `tel:<number>`. |
-| `/sitemap.xml` | `django.contrib.sitemaps.views.sitemap` | Sections registered in `apps/seo/sitemaps.py`. |
-| `/robots.txt` | `seo.views.robots_txt` | Disallows `/admin/`, `/dashboard/`, `/leads/go/`; points at the sitemap. |
-| `/dashboard/`, `/dashboard/leads/`, `/dashboard/pages/`, `/dashboard/content/`, `/dashboard/clinics/` | `dashboard.views.*` | `@staff_member_required` |
+| `/leads/go/whatsapp/<clinic_slug>/` | `leads.views.track_whatsapp` | Logs a `Lead`, then 302s to a prefilled `wa.me` link |
+| `/leads/go/call/<clinic_slug>/` | `leads.views.track_call` | Logs a `Lead`, then 302s to `tel:<number>` |
+| `/sitemap.xml` | `django.contrib.sitemaps.views.sitemap` | Sections registered in `apps/seo/sitemaps.py` |
+| `/robots.txt` | `seo.views.robots_txt` | Disallows `/admin/`, `/dashboard/`, `/leads/go/` |
+| `/dashboard/...` | `dashboard.views.*` | `@staff_member_required` |
 | `/admin/` | Django admin | Primary content-management surface |
 
-All CTA buttons in templates point at the `leads:track_whatsapp` / `leads:track_call` routes
-(not directly at `wa.me`/`tel:`) so every click is captured before the redirect fires.
+All CTA buttons route through `leads:track_whatsapp` / `leads:track_call` — never directly at `wa.me`/`tel:` — so every click is captured before the redirect fires.
 
 ## Data model
 
@@ -118,354 +155,99 @@ City ──< Locality ──< Clinic >── Treatment
 BlogCategory ──< BlogPost
 ```
 
-- **City / Locality** (`apps/locations`): Roorkee is the only seeded `City`; `Locality.full_slug`
-  generates the combined `dentist-in-roorkee-<locality>` slug used in routing.
-- **Clinic** (`apps/clinics`): owns FKs to City + Locality, M2M to Treatment/Problem,
-  holds contact info (`phone_number` for display, `whatsapp_number` in `wa.me`-ready
-  international format), and exposes `is_verified` / `whatsapp_link` / `tel_link` as
-  computed properties.
-- **VerificationRecord**: a clinic can have multiple records over time; `Clinic.is_verified`
-  looks at the most recent one and requires `is_verified=True`, `phone_confirmed=True`,
-  `timings_confirmed=True`, and `last_verified_at` within `VERIFICATION_FRESHNESS_DAYS`
-  (default 180, configurable via `.env`) — the "Verified" badge only shows when all four hold.
-- **ClinicFAQ**: a single flexible model with nullable FKs to Clinic/City/Locality/Treatment/
-  Problem so the same FAQ system serves every page type without four near-duplicate models.
-- **Lead** (`apps/leads`): one row per WhatsApp/Call click, capturing clinic, city, locality,
-  CTA type, page source, optional treatment/problem context, referrer, user agent, and IP.
-- **Review**: placeholder model, seeded with mock reviews; not user-submittable in Phase 1
-  (no public review form is exposed).
+- **City / Locality** — Roorkee is the only seeded `City`; `Locality.full_slug` generates the `dentist-in-roorkee-<locality>` slug used in routing.
+- **Clinic** — owns FKs to City + Locality, M2M to Treatment/Problem, holds contact info (`phone_number`, `whatsapp_number`), exposes `is_verified` / `whatsapp_link` / `tel_link`.
+- **VerificationRecord** — `Clinic.is_verified` looks at the most recent record and requires `is_verified`, `phone_confirmed`, `timings_confirmed`, and freshness within `VERIFICATION_FRESHNESS_DAYS` (default 180) — the "Verified" badge only shows when all four hold.
+- **ClinicFAQ** — one flexible model with nullable FKs to Clinic/City/Locality/Treatment/Problem, serving every page type without duplicated models.
+- **Lead** — one row per WhatsApp/Call click: clinic, city, locality, CTA type, page source, optional treatment/problem, referrer, user agent, IP.
+- **Review** — placeholder model, seeded with mock reviews; not user-submittable yet.
 
 ## What's mocked vs. production-ready
 
 **Production-ready:**
 - Full relational schema and Django admin CRUD for every model
 - Lead capture pipeline (click → DB row → redirect) with dashboard aggregation
-- SEO scaffolding: per-page meta title/description, canonical tags, breadcrumbs,
-  JSON-LD (`Dentist`/`ItemList`/`Article` schema), semantic H1/H2 structure
+- SEO scaffolding: meta title/description, canonical tags, breadcrumbs, JSON-LD schema, semantic H1/H2
 - Verification-freshness logic driving the "Verified" badge
 - City/locality/treatment/problem filtering on the city page
 
 **Mocked / placeholder (documented, not hidden):**
-- **Clinic photos, dentist photos, blog cover images**: templates render an explicit
-  "placeholder" block when no image is uploaded — no fake stock photos are shipped.
-- **Map embeds**: `Clinic.map_embed_url` exists but the clinic template shows a static
-  "Map embed placeholder" box — wire up a real Google Maps embed in Phase 2.
-- **Blog post bodies**: seeded with short placeholder paragraphs under real, on-topic
-  titles/categories — structure (slugs, categories, schema) is real, prose is not.
-- **Reviews**: seeded mock reviews; there's no public submission form.
-- **Tailwind via CDN** (`<script src="https://cdn.tailwindcss.com">` in `base.html`): fine for
-  Phase 1 iteration speed, but ships the full JIT compiler to the browser. Swap for a
-  compiled Tailwind build (`npm install -D tailwindcss` + a build step feeding
-  `static/css/tailwind.css`) before production.
-- **"List Your Clinic" WhatsApp number** in the header/homepage CTA is a placeholder
-  (`919999999999`) — replace with the real BestDentistIn business number.
+- **Photos** (clinic, dentist, blog cover) — templates render an explicit placeholder when no image is uploaded; no fake stock photos shipped
+- **Map embeds** — `Clinic.map_embed_url` exists; template currently shows a static placeholder box
+- **Blog post bodies** — real titles/categories, short placeholder prose
+- **Reviews** — seeded mock data, no public submission form yet
+- **Tailwind via CDN** — fine for iteration speed, but ships the full JIT compiler to the browser; swap for a compiled build before production
+- **"List Your Clinic" WhatsApp number** — placeholder (`919999999999`), replace with the real business number
 
-## SEO notes
+## Roadmap
 
-- Every public template extends `base.html`, which renders `{% block meta_title %}` /
-  `{% block meta_description %}` / a canonical `<link>` from `request.path`, and a
-  `{% block schema %}` for page-specific JSON-LD.
-- Clinic, treatment, and problem pages carry real (non-doorway) unique content — no two
-  locality pages are copy-pasted; each pulls its own FAQ, clinic list, and (optionally)
-  custom `intro_content` from the admin.
-- `sitemap.xml` and `robots.txt` are live — see [Phase 2](#phase-2-seo--lead-generation-engine).
+1. Compiled Tailwind build (drop the CDN script) + `django-compressor` or similar
+2. Public clinic self-signup/claim flow (currently: WhatsApp the team → admin adds the clinic and creates the portal login)
+3. Real Google Maps embed on clinic pages using `Clinic.map_embed_url`
+4. Multi-city expansion — `City` and locality-aware routing already generalize; see the [Phase 2 notes](#phase-2-seo--lead-generation-engine) on city-scoped `Treatment`/`Problem`
+5. WhatsApp Business API intake and an AI voice call bot — explicitly out of scope for now; see [Phase 4](#phase-4-ai-patient-intake) for the upgrade seam
+6. Premium/featured listings — `Clinic.is_featured` already exists and is used on the homepage
+7. Blog CMS — richer body field, real authored content
+8. Public review submission form with moderation
+9. Real analytics pipeline (GA4/Plausible) alongside the in-house `PageView` model
+10. Real clinic notifications (email/SMS/WhatsApp) — see `apps/leads/notifications.py`, a documented no-op stub
+11. Clinic staff invite flow — accounts are currently admin-created only
 
-## Next steps (post–Phase 4)
+## Who uses what: admin vs. dashboard vs. portal
 
-1. Compiled Tailwind build (drop the CDN script) + `django-compressor` or similar.
-2. Public clinic self-signup/claim flow (currently: WhatsApp the team, they get added via
-   admin, and Phase 3's `ClinicUser` inline lets an admin create their portal login at the same time).
-3. Real Google Maps embed on clinic pages using `Clinic.map_embed_url`.
-4. Multi-city expansion: `City` and locality-aware routing already generalize; `Treatment`/
-   `Problem` are currently global (not city-scoped) — see the Phase 2 section for what that
-   means for queries like "braces cost in Dehradun" and the extension path.
-5. WhatsApp Business API intake, an AI voice call bot, and automatic appointment routing are
-   explicitly **out of scope** — see [Phase 4](#phase-4-ai-patient-intake) for what's built
-   instead (rule-based intake) and the seam to plug a real LLM/voice channel in later.
-6. Premium/featured listings: `Clinic.is_featured` already exists and is used on the
-   homepage — a payments/ranking layer can build on top of it later.
-7. Blog CMS: current `BlogPost` model is basic `TextField` body; consider a rich-text or
-   Markdown field, plus real authored content to replace the seeded placeholders.
-8. Public review submission form with moderation (the `Review` model exists; there's no
-   public write path yet).
-9. A real analytics pipeline (GA4/Plausible) alongside `PageView` — the in-house model is
-   deliberately minimal (page-level counts for the internal dashboard), not a GA replacement.
-10. Real clinic notifications (email/SMS/WhatsApp) — see `apps/leads/notifications.py`, a
-    documented no-op stub that already sits at the right point in the lead-creation flow.
-11. Clinic staff invite flow — accounts are currently created via Django admin only (by
-    design for Phase 3's scope); a self-service "owner invites staff" flow is a natural next step.
-
-## Admin / dashboard / portal — who uses what
-
-- **Django admin** (`/admin/`) — BestDentistIn's internal management backend: add/edit
-  clinics (with inline dentists, verification records, FAQs, and **clinic portal accounts**),
-  treatments, problems, blog posts, and inspect leads/page views/intake sessions (read-only
-  where the data is auto-captured). Only Django staff/superusers use this.
-- **`/dashboard/`** — BestDentistIn's internal SEO/ops dashboard (staff-only), covering leads
-  and content performance *across all clinics*. See [Phase 2 dashboard pages](#dashboard-additions).
-- **`/portal/`** — the clinic's own dashboard (Phase 3), scoped to *their* clinic only. See
-  [Phase 3](#phase-3-clinic-saas-dashboard) below. Clinics never see `/dashboard/` or `/admin/`.
+- **Django admin** (`/admin/`) — BestDentistIn's internal management backend: clinics (with inline dentists, verification records, FAQs, portal accounts), treatments, problems, blog posts, and read-only inspection of leads/page views/intake sessions. Staff/superusers only.
+- **`/dashboard/`** — internal SEO/ops dashboard (staff-only), covering leads and content performance across all clinics.
+- **`/portal/`** — the clinic's own dashboard, scoped to their clinic only. Clinics never see `/dashboard/` or `/admin/`.
 
 ---
 
 ## Phase 2: SEO & lead generation engine
 
-Phase 2 doesn't add new page *types* — it makes the existing city/locality/treatment/problem/
-clinic/blog pages rank better and makes it possible to see, internally, which of them actually
-produce leads.
+Phase 2 doesn't add new page types — it makes the existing pages rank better and makes it possible to see, internally, which of them actually produce leads.
 
-### New apps
+**New apps:**
+- **`apps/analytics`** — `PageView`: one row per page open, with UTM params and referrer. A visitor browsing five pages produces five `PageView` rows and zero `Lead` rows unless they click WhatsApp or Call. `track_pageview()` seeds `request.session["utm"]` on first touch, so a later WhatsApp click still attributes back to the original campaign.
+- **`apps/seo`** — no models, four helper modules used by every public view:
+  - `schema.py` — JSON-LD builders (`BreadcrumbList`, `FAQPage`, `Dentist`/LocalBusiness, `Article`), combined via `to_json_ld()` into one `@graph` payload per page
+  - `breadcrumbs.py` — one function per page type; the same source of truth powers both the visible breadcrumb nav and the schema
+  - `linking.py` — the internal-linking engine (`nearby_localities`, `nearby_clinics`, related blog/treatment/problem links), city-agnostic
+  - `sitemaps.py` — sitemap sections for cities, localities, treatments, problems, clinics, and blog posts
 
-- **`apps/analytics`** — `PageView`: one row per page open (city/locality/clinic/treatment/
-  problem/blog/home), with UTM params and referrer. This is analytics, not leads — a visitor
-  browsing five pages produces five `PageView` rows and zero `Lead` rows unless they click
-  WhatsApp or Call. `track_pageview()` also seeds `request.session["utm"]` on first touch, so
-  a WhatsApp click several pages into the visit still attributes back to the campaign that
-  brought the visitor in (see `apps/leads/views.py::_resolve_utm`).
-- **`apps/seo`** — no models; four helper modules used by every public view:
-  - `schema.py` — builds JSON-LD dicts (`BreadcrumbList`, `FAQPage`, `Dentist`/LocalBusiness,
-    `Article`, `ItemList`) and `to_json_ld(*schemas)` combines them into one `@graph` payload
-    per page, rendered by `base.html`'s `{% block schema %}`.
-  - `breadcrumbs.py` — one function per page type, returning the same `(label, url)` list
-    consumed by both the visible breadcrumb nav (`partials/breadcrumbs.html`) and
-    `schema.breadcrumb_list_schema()` — one source of truth, no drift between what users see
-    and what search engines see.
-  - `linking.py` — the internal-linking engine: `nearby_localities`, `nearby_clinics`,
-    `related_blog_posts_for_treatment`/`_problem`, `related_pages_for_blog_post`. City-agnostic
-    (works off `clinic.city`/`locality.city`, never a hardcoded slug).
-  - `sitemaps.py` — `Sitemap` subclasses for cities, localities, treatments, problems, clinics,
-    and blog posts, registered at `/sitemap.xml`. `/robots.txt` (in `seo/views.py`) disallows
-    `/admin/`, `/dashboard/`, and `/leads/go/` (the tracking redirects shouldn't be crawled).
+**Leads vs. page views — the important distinction:** only WhatsApp/Call clicks are leads; page opens are analytics. `Lead` gained `page_slug`, `cta_label`, and `utm_source`/`utm_medium`/`utm_campaign` so a lead traces back to the exact page and campaign that produced it.
 
-### Leads vs. page views — the important distinction
+**Dashboard additions:** total page views and CTR at `/dashboard/`, top lead-generating pages and low-conversion pages at `/dashboard/pages/`, city/treatment/problem breakdowns at `/dashboard/content/`.
 
-> Only WhatsApp/Call clicks are leads. Page opens are analytics.
-
-- `apps.leads.Lead` — created **only** by `/leads/go/whatsapp/...` and `/leads/go/call/...`.
-  Phase 2 added `page_slug`, `cta_label`, and `utm_source`/`utm_medium`/`utm_campaign` so a
-  lead can be traced back to the exact page and campaign that produced it, not just the page
-  *type*.
-- `apps.analytics.PageView` — created by every public detail/list view via `track_pageview()`
-  (called once per request, right where the view already has the relevant objects in scope —
-  see `apps/locations/views.py`, `apps/clinics/views.py`, `apps/content/views.py`,
-  `apps/core/views.py`). Never touches the `Lead` table.
-- The blog got a light restructure to make "blog CTA click" a real, traceable lead rather than
-  a vague concept: `blog_detail` now pulls a few clinics that offer the post's most relevant
-  related treatment and renders them with normal WhatsApp/Call CTAs (`page_source=blog`) —
-  see `apps/content/views.py::blog_detail`.
-
-### Content model enhancements
-
-- `BlogCategory` gained `treatments`/`problems` M2M fields (to `clinics.Treatment`/`Problem`).
-  This is what powers "related blog posts" on treatment/problem pages and "related treatment/
-  problem pages" on blog posts — curated via the admin, not string-matching. `seed_roorkee`
-  populates realistic links (e.g. category "Root Canal" → treatment `root-canal-treatment` +
-  problems `tooth-pain`, `cavity`).
-- `Lead` gained `page_slug`, `cta_label`, `utm_source`, `utm_medium`, `utm_campaign`.
-
-### Dashboard additions
-
-- `/dashboard/` (overview) — added total page views and overall CTR (leads ÷ views) alongside
-  the Phase 1 lead counts.
-- `/dashboard/pages/` — **top lead-generating pages** (grouped by page type + slug) and
-  **pages with traffic but weak conversion** (≥3 views, sorted by lowest CTR) — the list a
-  growth operator checks first: what's working, and what's getting search traffic but failing
-  to convert.
-- `/dashboard/content/` — views/leads/CTR broken down by city, by treatment, and by problem.
-- `/dashboard/leads/` (Phase 1, extended) — now shows `page_slug` and `utm_source` per lead.
-
-### Search-intent → page-type mapping (Phase 2 design, not new code)
-
-The routing already in place satisfies the brief's intent map without new machinery:
-
-| Query pattern | Page type | Route |
-|---|---|---|
-| "dentist near me" / "dentist in Roorkee" | City page | `/dentist-in-<city>/` |
-| "dentist in Civil Lines Roorkee" | Locality page | `/dentist-in-<city>-<locality>/` |
-| "root canal in Roorkee" | Treatment page | `/treatments/<slug>/` |
-| "tooth pain dentist Roorkee" / "best dentist for tooth pain" | Problem page (+ clinic list) | `/problems/<slug>/` |
-| "braces cost in Dehradun" (future city) | Treatment page, city-scoped | See note below |
-
-**Multi-city status** (updated post–Phase 2): `Treatment` and `Problem` now carry a `city` FK
-(`unique_together = (city, slug)`), so a second city *can* have its own fee range, copy, and
-FAQ content for "Braces" without touching Roorkee's — e.g. Dehradun's braces page would be a
-genuinely separate `Treatment` row from Roorkee's. What's **not** built yet: the URL is still
-flat (`/treatments/<slug>/`, resolved against `PRIMARY_CITY_SLUG` in
-`clinics/views.py::treatment_detail`/`problem_detail`) rather than city-prefixed, so a second
-city reusing the same slug (e.g. both cities having a `braces-orthodontics` treatment) would
-need city-prefixed URLs (`/treatments/<city>/<slug>/`) to be reachable — that URL change is
-still deferred until a second city actually exists, per "don't build for cities that don't
-exist yet." Every place that queries `Treatment`/`Problem` (home, city/locality pages, the
-footer, the intake classifier) now filters by city explicitly — see
-`apps/core/utils.py::get_primary_city()` and `apps/clinics/models.py`'s `Treatment`/`Problem`
-docstrings.
-
-### What's still mocked in Phase 2
-
-- No real analytics warehouse — `PageView` is a lightweight in-app table for the internal
-  dashboard, not a GA4/Plausible replacement (see Next Steps).
-- UTM attribution is session-based (first-touch within a browser session), not a persistent
-  cross-session identity — fine for a single-session "ad click → WhatsApp lead" flow, not for
-  multi-session attribution.
-- `robots.txt`/`sitemap.xml` are functionally complete but untested against a real search
-  console — verify indexing status after the first production deploy.
-
----
+**Multi-city status:** `Treatment` and `Problem` now carry a `city` FK (`unique_together = (city, slug)`), so a second city can have its own treatment/problem content without touching Roorkee's. URLs are still flat (`/treatments/<slug>/`) rather than city-prefixed — that change is deferred until a second city actually exists.
 
 ## Phase 3: Clinic SaaS Dashboard
 
-A lightweight, mobile-friendly dashboard at `/portal/` so a clinic can manage its own leads
-without touching Django admin. Deliberately not a CRM: no pipelines, no email sequencing, no
-custom fields — a status, a follow-up date, a note, and an activity log.
+A lightweight, mobile-friendly dashboard at `/portal/` so a clinic can manage its own leads without touching Django admin. Deliberately not a CRM: no pipelines, no email sequencing, no custom fields.
 
-### Access model
+**Access model:** `apps.accounts.ClinicUser` links a Django `User` to one `Clinic` with a role (`owner`/`staff`). Accounts are created via Django admin only — no public signup. `clinic_login_required` scopes every query to the logged-in clinic; staff can only edit leads that are unassigned or assigned to them, while owners can edit and reassign anything.
 
-- **`apps.accounts.ClinicUser`** links a normal Django `auth.User` to one `Clinic` with a
-  `role` (`owner` or `staff`). BestDentistIn staff use plain `is_staff` Django accounts and
-  never get a `ClinicUser` row — the two account systems are intentionally separate
-  (`/admin/`+`/dashboard/` vs. `/portal/`).
-- **Creating accounts**: super admins create clinic logins from the Django admin — open a
-  `Clinic`, and there's a "Clinic users" inline (add a `User` there first via `/admin/auth/user/add/`,
-  or use the `seed_portal_demo` command for local testing). There's no public signup.
-- **Permissions** (`apps/portal/decorators.py`):
-  - `clinic_login_required` — any active `ClinicUser`; scopes every query to `request.clinic_user.clinic`
-    so a clinic can never see another clinic's data (enforced in the view, not just the UI).
-  - `owner_required` — stacked on top for `/portal/settings/`; staff get redirected with a message.
-  - Within a clinic, **staff can only edit leads that are unassigned or assigned to them**
-    (`_can_edit()` in `apps/portal/views.py`); the owner can edit and reassign anything. This is
-    the "staff can view/update assigned leads if allowed" rule from the brief, implemented as
-    "assigned to them, or nobody yet" rather than a separate permission flag.
+**Lead workflow:** `Lead` gained `status`, `follow_up_type`, `follow_up_date`, `assigned_to`, `last_contacted_at`, `missed_reason`, and more. `LeadNote` holds free-text notes; `LeadActivityLog` is an append-only audit trail of every status/follow-up/assignment change. Missed-lead tracking is computed live at `/portal/reminders/` (any lead still `status=new` after 24 hours), not via a background job.
 
-### Lead workflow
-
-- `Lead` (in `apps.leads`, shared with Phases 1–2) gained: `status`, `follow_up_type`,
-  `follow_up_date`, `assigned_to` (→ `ClinicUser`), `last_contacted_at`, `missed_reason`,
-  `contact_number`, `message`. Setting `status` to Contacted/Scheduled/Visited auto-stamps
-  `last_contacted_at` — see `lead_detail` in `apps/portal/views.py`.
-- **`LeadNote`** — free-text notes, one clinic user's running commentary on a lead.
-- **`LeadActivityLog`** — append-only: every status change, follow-up change, assignment
-  change, and note gets an entry with who did it and when. Shown in the lead detail sidebar
-  and mirrored as a read-only inline in Django admin.
-- **Missed-lead tracking** is deliberately not a background job — `/portal/reminders/` computes
-  it live: any lead still `status=new` more than 24 hours after `created_at` shows up under
-  "Missed / No Response," alongside explicit `follow_up_date` buckets (overdue/today/upcoming).
-  A clinic can also hand-mark a lead `status=missed` with a `missed_reason`.
-
-### Portal pages
-
-| Page | Purpose |
-|---|---|
-| `/portal/login/` | Clinic login (separate from `/admin/login/`) |
-| `/portal/` (overview) | Lead counts, status breakdown, WhatsApp vs. call, recent leads |
-| `/portal/leads/` | Filterable lead inbox (status, CTA type, "assigned to me") |
-| `/portal/leads/<id>/` | Full lead detail: update status/follow-up/assignment, add notes, view activity log |
-| `/portal/analytics/` | Leads by source page, treatment, problem, locality, status |
-| `/portal/reminders/` | Overdue / today / upcoming follow-ups + stale "missed" leads |
-| `/portal/settings/` | Owner-only: edit phone/WhatsApp/timings/fee/about; view team list |
-
-Note what `/portal/settings/` deliberately **doesn't** let a clinic touch: verification status,
-address, treatments/problems offered, or team membership — those stay admin-managed so
-BestDentistIn keeps control of the data that feeds SEO and the "Verified" badge.
-
----
+**Portal pages:** `/portal/login/`, `/portal/` (overview), `/portal/leads/` (filterable inbox), `/portal/leads/<id>/` (detail + notes + activity log), `/portal/analytics/`, `/portal/reminders/`, `/portal/settings/` (owner-only, and deliberately doesn't expose verification status, address, or treatments — those stay admin-managed).
 
 ## Phase 4: AI Patient Intake
 
-A short, structured intake flow at `/intake/` that routes a patient to relevant clinics —
-**it never diagnoses**, and every intake page carries an explicit disclaimer to that effect.
+A short, structured intake flow at `/intake/` that routes a patient to relevant clinics — **it never diagnoses**, and every page carries an explicit disclaimer.
 
-### Why rule-based, not an LLM call
+**Why rule-based, not an LLM call:** `apps/intake/classifier.py` is a deterministic keyword matcher, deliberately. It never fabricates a diagnosis or a confidence it doesn't have, needs no API key or network call, and exposes a clean upgrade path — `classify(text)` returns a `ClassificationResult` dataclass (`problem`, `confidence`, `notes`, `matched_treatments`); swapping the body for a real LLM call changes nothing else in the app.
 
-`apps/intake/classifier.py` is a deterministic keyword matcher, not a call to an LLM API. This
-was a deliberate choice for this build, not a shortcut:
+**Flow:** `/intake/` → single-page form (problem description, severity, duration, patient type, locality, preferred time, optional age/phone/language) → `IntakeSession` created and classified → `match_clinics()` ranks clinics (verified-first, matched treatment/problem, preferred locality, then city-wide fallback) → `/intake/<session_key>/` shows results with normal WhatsApp/Call CTAs. Clicking a CTA creates a real `Lead` linked back to the `IntakeSession` via the same tracking redirect every other page uses.
 
-- **Honesty**: it never fabricates a diagnosis or a confidence it doesn't have — it either
-  matches a known `Problem` category from phrasing (including a small synonym list — see
-  `SYNONYMS` in `classifier.py`) or it says so and still shows clinics.
-- **No external dependency**: no API key, no network call, no per-request cost, works fully
-  offline in this environment.
-- **Clean upgrade path**: `classify(text)` returns a small `ClassificationResult` dataclass
-  (`problem`, `confidence`, `notes`, `matched_treatments`). Swap the body for a real LLM call
-  (e.g. the Claude API, prompted to return one of the existing `Problem` slugs) and nothing
-  else in the app changes — `intake/views.py` and `intake/routing.py` only depend on that shape.
+**Safety:** disclaimers appear on both the form and results page; `urgency` is the patient's own self-rating and only changes on-page messaging, never a clinical claim; classifier confidence/notes are admin-only, never shown to the patient.
 
-### Flow
-
-1. **`/intake/`** (`intake_start`) — a single-page form (not a live multi-turn chat — see
-   Future Extensions) asking: problem description, severity, duration, new/existing patient,
-   preferred locality, preferred time, and optional age group/phone/language. A disclaimer
-   banner is shown before and after submission.
-2. On submit, `IntakeSession` is created, `classify()` runs against the description, and
-   `apps/intake/routing.py::match_clinics()` ranks clinics: verified-first, filtered by the
-   matched treatment/problem, preferring the requested locality, falling back to the rest of
-   the city, and finally to any active clinic so results are never empty.
-3. **`/intake/<session_key>/`** (`intake_results`) — shows what was understood (with an
-   explicit "we couldn't confidently match a category" fallback message when the classifier
-   has low confidence), the suggested treatment tags, and the matched clinics with normal
-   WhatsApp/Call CTAs.
-4. Clicking a CTA goes through the *same* `/leads/go/whatsapp/` or `/leads/go/call/` redirect
-   as every other page (`page_source=intake`) — this is what makes "create a lead record" and
-   "outcome tracking" real rather than a separate parallel system: `Lead.intake_session` links
-   back to the `IntakeSession`, and the session's `lead_created`/`selected_clinic` fields get
-   set the moment a CTA is actually clicked (see `apps/leads/views.py::_log_lead`).
-
-### Data model (`apps.intake.IntakeSession`)
-
-Raw inputs (`problem_description`, `urgency`, `duration`, `patient_type`, `preferred_locality`,
-`preferred_time`, `age_group`, `phone`, `language_preference`) are stored separately from the
-routing result (`problem_category`, `suggested_treatments`, `matched_clinics`,
-`selected_clinic`, `confidence_score`, `ai_notes`, `lead_created`) — so it's always inspectable
-in Django admin *why* a patient was routed where they were.
-
-### Safety
-
-- The disclaimer ("informational only, not a diagnosis, not a substitute for a dentist, seek
-  urgent/emergency care for severe symptoms") appears on both the intake form and the results
-  page — not just once.
-- `urgency` is a patient's own self-rating, never presented back as a clinical assessment; a
-  "high" rating only changes the on-page messaging ("contact a clinic directly today"), not
-  any clinical claim.
-- The classifier's `notes`/`confidence_score` are internal (`ai_notes`, visible in admin) —
-  never rendered to the patient as medical output.
-
-### Clinic notifications (stub)
-
-`apps/leads/notifications.py::notify_clinic_of_lead()` fires on every lead — including
-intake-sourced ones — and currently just logs (see the `bestdentistin` logger in `settings.py`).
-Wiring it to real email/SMS/WhatsApp delivery is a Next Step; the function already sits at the
-right point in the flow so that's a delivery-channel change, not an architecture change.
-
-### Future extensions (explicitly not built here)
-
-- **WhatsApp bot intake**: `IntakeSession.source_channel` already has a `whatsapp` choice
-  waiting for a webhook-based view that creates sessions the same way `intake_start` does.
-- **AI voice call bot**: same idea, `source_channel="voice"`.
-- **Multilingual intake**: `language_preference` is captured but not yet used to translate the
-  form or route to language-matching clinics.
-- **A real multi-turn chat UI**: today's intake is a single form, not a conversational back-and-forth
-  — simpler and more reliable to ship, and the data model doesn't need to change to support a
-  chat UI later (it would just populate the same `IntakeSession` fields turn-by-turn instead of
-  all at once).
+**Not built here (by design):** WhatsApp bot intake, an AI voice call bot, multilingual routing, and a multi-turn chat UI — `IntakeSession.source_channel` and `language_preference` already exist as seams for these.
 
 ---
 
-## Note: reconciling with the standalone blueprint doc
+## Design notes
 
-A separate project blueprint document (different app/model naming — `LeadEvent`+`LeadStatus`
-instead of `Lead`, `seo_title`/`seo_description` instead of `meta_title`/`meta_description`,
-`/lead/whatsapp/` instead of `/leads/go/whatsapp/<slug>/`, etc.) was reviewed against this
-codebase. Rather than a full rename/restructure — which would mean a large schema + URL +
-template rewrite of already-working, tested code for naming differences with no functional
-gain — two specific, valuable pieces from it were adopted:
+A separate project blueprint (different naming conventions — `LeadEvent`, `seo_title`, `/lead/whatsapp/`, etc.) was reviewed against this codebase. Rather than a full rename for no functional gain, two genuinely valuable pieces were adopted:
 
-1. **City-scoped `Treatment`/`Problem`** (this section, above) — genuinely useful for real
-   multi-city support and wasn't in the original Phase 2 design.
-2. **`ClinicPhoto`** (`apps/clinics/models.py`) — a real gallery model wired into
-   `clinic_detail.html`, replacing what was a permanent placeholder. Admin-manageable via an
-   inline on `ClinicAdmin`.
+1. **City-scoped `Treatment`/`Problem`** — real multi-city support, wasn't in the original Phase 2 design
+2. **`ClinicPhoto`** — a real gallery model wired into `clinic_detail.html`, replacing a permanent placeholder
 
-**Deliberately not adopted**: the blueprint's `ClinicService` model. It would model exactly
-what `Clinic.treatments` (the existing Treatment M2M) already models — a clinic's list of
-services — under a different name. Adding it would mean either two parallel, unsynchronized
-ways to say "this clinic offers root canals," or `ClinicService` reduces to a thin proxy over
-`Treatment` with no independent purpose. Neither is worth the duplication.
+**Deliberately not adopted:** the blueprint's `ClinicService` model — it would model exactly what `Clinic.treatments` already models, under a different name, with no independent purpose.
