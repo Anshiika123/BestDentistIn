@@ -1,4 +1,4 @@
-# BestDentistIn 🦷
+# BestDentistIn 
 
 **A local dental discovery and lead-generation platform — built for Roorkee, designed to scale to any city.**
 
